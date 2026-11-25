@@ -1,0 +1,1202 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#090e1b">
+  <title>EXAMLY — подготовка к ОГЭ и ЕГЭ</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #090e1b;
+      --panel: #111c32;
+      --panel-2: #15213a;
+      --line: #263550;
+      --text: #f4f7ff;
+      --muted: #98a9c8;
+      --blue: #83aaff;
+      --radius: 20px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse at 85% 0%, rgba(67,105,184,.18), transparent 34rem),
+        radial-gradient(ellipse at 0% 40%, rgba(83,65,145,.12), transparent 30rem),
+        var(--bg);
+      color: var(--text);
+      font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    button { font: inherit; cursor: pointer; }
+    .app { width: min(100%, 1050px); margin: 0 auto; padding: 22px 18px 44px; }
+    /* Дополнительный верхний отступ внутри Telegram Mini App, чтобы заголовки вкладок не попадали под системную панель. */
+    body.telegram-mini-app .app { padding-top: calc(22px + var(--tg-content-safe-top, 24px)); }
+    .topbar { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:22px; }
+    .brand { display:flex; align-items:center; gap:11px; }
+    .logo {
+      width:44px; height:44px; display:grid; place-items:center; border-radius:14px;
+      background:linear-gradient(145deg,#294779,#172544); color:#a9c5ff;
+      font-size:24px; font-weight:850; box-shadow:inset 0 1px 0 #ffffff25;
+    }
+    .brand-name { font-weight:850; letter-spacing:.12em; font-size:17px; }
+    .brand-sub { color:#8296ba; font-size:9px; letter-spacing:.13em; }
+    .beta { color:#91e0b4; border:1px solid #397456; background:#153528; padding:5px 10px; border-radius:99px; font-size:11px; font-weight:800; letter-spacing:.08em; }
+    .hero {
+      background:linear-gradient(120deg,#17294a,#111c32 62%,#1c2340);
+      border:1px solid #2b3e61; border-radius:26px; padding:26px; position:relative; overflow:hidden;
+      box-shadow:0 18px 55px #0003;
+    }
+    .hero:after { content:""; position:absolute; width:220px;height:220px;right:-70px;top:-90px;border-radius:50%;background:#789fff18;filter:blur(2px); }
+    .eyebrow { color:#9db7e7; font-size:11px; font-weight:800; letter-spacing:.15em; }
+    h1 { margin:9px 0 8px; font-size:clamp(27px,5vw,43px); line-height:1.08; letter-spacing:-.04em; }
+    .hero p { color:#b4c3df; max-width:590px; margin:0; }
+    .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:22px; max-width:560px; }
+    .stat { background:#ffffff0b; border:1px solid #ffffff12; border-radius:14px; padding:11px 13px; }
+    .stat small { display:block; color:#9eafd0; font-size:10px; letter-spacing:.08em; }
+    .stat strong { display:block; margin-top:3px; font-size:19px; }
+    .exam-switch { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin:18px 0; }
+    .exam-btn,.nav-btn,.outline-btn,.primary-btn {
+      border:1px solid var(--line); border-radius:13px; padding:11px 14px; color:#c6d3e9; background:#111c32;
+      transition:transform .15s,border-color .15s,background .15s;
+    }
+    button:hover { transform:translateY(-1px); }
+    .exam-btn.active,.nav-btn.active { background:#294779; border-color:#7198e4; color:white; }
+    .nav {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:9px;
+      margin-bottom:20px;
+      padding:7px;
+      border:1px solid #202f49;
+      border-radius:18px;
+      background:linear-gradient(145deg,#0e1729,#111c30);
+      box-shadow:inset 0 1px 0 #ffffff08;
+    }
+    .nav-btn {
+      min-width:0;
+      padding:12px 8px;
+      border-radius:12px;
+      background:transparent;
+      border-color:transparent;
+      color:#aebed8;
+      font-size:13px;
+      font-weight:700;
+      white-space:nowrap;
+    }
+    .nav-btn.active {
+      background:linear-gradient(145deg,#34558a,#243e69);
+      border-color:#648bd0;
+      color:#fff;
+      box-shadow:0 4px 14px #0003,inset 0 1px 0 #ffffff20;
+    }
+    .nav-btn:not(.active):hover {
+      background:#ffffff09;
+      border-color:#344766;
+      color:#e5edfb;
+    }
+    .section-head { display:flex; align-items:end; justify-content:space-between; gap:12px; margin:22px 0 13px; }
+    h2 { font-size:21px; letter-spacing:-.025em; margin:0; }
+    .muted { color:var(--muted); font-size:13px; margin:5px 0 0; }
+    .subject-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:11px; }
+    .subject {
+      text-align:left; min-height:128px; padding:15px; border-radius:17px; border:1px solid var(--line);
+      background:linear-gradient(145deg,#17243b,#111a2b); color:var(--text); display:flex; flex-direction:column; gap:9px;
+    }
+    .subject.selected { outline:2px solid var(--subject-color); border-color:var(--subject-color); }
+    .subject-top { display:flex; justify-content:space-between; align-items:center; }
+    .subject-icon { width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:color-mix(in srgb,var(--subject-color) 16%,transparent);color:var(--subject-color); flex:0 0 38px; }
+    .subject-icon svg { width:21px;height:21px;display:block;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round; }
+    .subject-name { font-weight:750; }
+    .subject-desc { color:#91a2c0; font-size:11px; }
+    .feature-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px; }
+    .feature { background:#121e33;border:1px solid #24344f;border-radius:16px;padding:15px; }
+    .feature-icon { font-size:20px; margin-bottom:5px; }
+    .feature strong { display:block; }
+    .feature small { color:var(--muted); }
+    .callout { background:#121e33;border:1px solid #293b5c;border-radius:18px;padding:18px;margin-top:17px; }
+    .primary-btn { background:#6f98e8; border-color:#8bb0ff; color:#071326; font-weight:800; }
+    .primary-btn:hover { background:#8aaff8; }
+    a.primary-btn { display:inline-block; text-align:center; text-decoration:none; }
+    .outline-btn { background:transparent; }
+    .full { width:100%; margin-top:12px; }
+    .pricing-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:12px; }
+    .plan { background:#121e33;border:1px solid #293953;border-radius:20px;padding:19px;display:flex;flex-direction:column; }
+    .plan.popular { border:2px solid #7299e6;background:linear-gradient(150deg,#1a2b4b,#142039); }
+    .plan h3 { margin:0;font-size:19px; }
+    .price { font-size:29px;font-weight:850;letter-spacing:-.04em;margin:10px 0 0; }
+    .period { color:var(--muted);font-size:12px; }
+    .plan p { color:#aab9d2;font-size:13px;min-height:38px; }
+    .plan ul { list-style:none;padding:0;margin:8px 0 15px;display:grid;gap:8px;color:#d8e2f2;font-size:13px; }
+    .plan li:before { content:"✓";color:#8fd7ae;font-weight:900;margin-right:8px; }
+    .plan .primary-btn,.plan .outline-btn { margin-top:auto; }
+    .period-switch { display:flex;gap:5px;padding:4px;background:#101a2d;border:1px solid #253550;border-radius:13px;width:max-content; }
+    .period-switch button { border:0;background:transparent;color:#a9b9d2;padding:8px 12px;border-radius:9px; }
+    .period-switch button.active { background:#294779;color:white; }
+    .notice { margin-top:15px;padding:13px 15px;border-radius:14px;background:#2b2618;border:1px solid #69552b;color:#e8d4a2;font-size:12px; }
+    .selection { margin-top:13px;color:#b6c6df;font-size:13px; }
+    .faq-list { display:grid; gap:10px; }
+    .faq-item { background:#121e33; border:1px solid #293953; border-radius:16px; overflow:hidden; }
+    .faq-question { width:100%; display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px; border:0; background:transparent; color:var(--text); text-align:left; font-weight:750; }
+    .faq-question span:last-child { color:#9db7e7; font-size:20px; transition:transform .2s; }
+    .faq-answer { padding:0 16px 16px; color:#aab9d2; font-size:13px; }
+    .faq-item.open .faq-question span:last-child { transform:rotate(180deg); }
+    .faq-item.open { border-color:#526f9f; }
+
+    .course-hero { background:linear-gradient(125deg,#1a3157,#111d34 70%,#202746);border:1px solid #34517c;border-radius:21px;padding:21px;margin-bottom:14px; }
+    .course-tag { display:inline-flex;align-items:center;gap:7px;color:#b8cefa;background:#ffffff0c;border:1px solid #ffffff18;border-radius:99px;padding:6px 10px;font-size:11px;font-weight:750; }
+    .course-progress { height:7px;background:#ffffff12;border-radius:99px;overflow:hidden;margin-top:14px; }
+    .course-progress span { display:block;height:100%;width:0;background:linear-gradient(90deg,#7199e9,#a8c4ff);border-radius:99px;transition:width .25s; }
+    .course-module { background:#121e33;border:1px solid #293953;border-radius:16px;padding:15px;margin-top:10px; }
+    .course-module.active { border-color:#597bb6;background:linear-gradient(145deg,#172844,#121e33); }
+    .course-module-top { display:flex;align-items:center;gap:12px; }
+    .module-number { width:34px;height:34px;display:grid;place-items:center;flex:0 0 34px;border-radius:11px;background:#263f68;color:#c8d9ff;font-weight:850; }
+    .course-module h3 { margin:0;font-size:14px; }
+    .course-module p { margin:3px 0 0;color:var(--muted);font-size:12px; }
+    .lesson-card { background:#111c30;border:1px solid #304463;border-radius:18px;padding:18px;margin-top:15px; }
+    .lesson-card h3 { margin:5px 0 8px;font-size:19px; }
+    .lesson-text { color:#c1cde1;font-size:13px; }
+    .lesson-example { background:#0b1425;border:1px solid #2a3b59;border-radius:13px;padding:13px;margin:12px 0;color:#e4edff; }
+    .lesson-example strong { color:#a9c5ff; }
+    .source-note { margin-top:14px;padding:12px 14px;border:1px solid #30415e;border-radius:13px;background:#0d1729;color:#9fb0ce;font-size:11px; }
+    .source-note a { color:#a9c5ff;text-decoration:none; }
+    .quiz-question { padding:14px 0;border-top:1px solid #263650; }
+    .quiz-question:first-child { border-top:0; }
+    .quiz-question strong { display:block;margin-bottom:9px;font-size:14px; }
+    .quiz-options { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px; }
+    .quiz-option { border:1px solid #30415e;background:#0e192c;color:#dce6f8;border-radius:11px;padding:10px;text-align:left;font-size:13px; }
+    .quiz-option.selected { border-color:#80a7f4;background:#20385e;color:#fff; }
+    .quiz-option.correct { border-color:#4c9c79;background:#173b31;color:#c6f4dc; }
+    .quiz-option.wrong { border-color:#a75b68;background:#40232d;color:#ffd5dc; }
+    .quiz-feedback { margin-top:9px;color:#aebed8;font-size:12px; }
+    .quiz-result { margin-top:12px;padding:13px;border-radius:13px;background:#14243d;border:1px solid #3a5682;color:#dce8ff;font-size:13px; }
+    @media(max-width:480px){.quiz-options{grid-template-columns:1fr 1fr}.course-hero{padding:17px}}
+
+    .hidden { display:none !important; }
+    footer { margin-top:27px;border-top:1px solid #202e46;padding-top:16px;color:#7185a8;font-size:11px;display:flex;justify-content:space-between;gap:12px; }
+    @media (max-width:700px) {
+      .app { padding:16px 13px 32px; }
+      .hero { padding:21px; }
+      .subject-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .pricing-grid { grid-template-columns:1fr; }
+      .stats { gap:7px; }
+      .stat { padding:9px; }
+      .stat strong { font-size:16px; }
+    }
+    @media (max-width:380px) {
+      .subject-grid { grid-template-columns:1fr; }
+      .brand-sub { font-size:8px; }
+      .hero { padding:18px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">E</div>
+        <div><div class="brand-name">EXAMLY</div><div class="brand-sub">ТВОЙ ПУТЬ К ВЫСОКОМУ БАЛЛУ</div></div>
+      </div>
+      <span class="beta">BETA</span>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow">ПОДГОТОВКА К ЭКЗАМЕНАМ</div>
+      <h1>Сдай на максимум.</h1>
+      <p>Готовься к ОГЭ и ЕГЭ в своём темпе. Изучай теорию, решай задания и отслеживай свой прогресс.</p>
+      <div class="stats">
+        <div class="stat"><small>ПРЕДМЕТОВ</small><strong>11+</strong></div>
+        <div class="stat"><small>ЭКЗАМЕНЫ</small><strong>ОГЭ / ЕГЭ</strong></div>
+        <div class="stat"><small>РЕЖИМ</small><strong>24/7</strong></div>
+      </div>
+    </section>
+
+    <div class="exam-switch" role="group" aria-label="Выбор экзамена">
+      <button class="exam-btn active" data-exam="ОГЭ">ОГЭ · 9 класс</button>
+      <button class="exam-btn" data-exam="ЕГЭ">ЕГЭ · 11 класс</button>
+    </div>
+
+    <nav class="nav" aria-label="Основная навигация">
+      <button class="nav-btn active" data-tab="home">Главная</button>
+      <button class="nav-btn" data-tab="subjects">Предметы</button>
+      <button class="nav-btn" data-tab="tariffs">Тарифы</button>
+      <button class="nav-btn" data-tab="faq">Помощь</button>
+      <button class="nav-btn" data-tab="support">Поддержка</button>
+      <button class="nav-btn" data-tab="about">О создателе</button>
+    </nav>
+
+    <section id="home" class="page">
+      <div class="section-head"><div><h2>Продолжить подготовку</h2><p class="muted">Твой учебный маршрут</p></div><span class="beta" id="exam-label">ОГЭ</span></div>
+      <div class="callout">
+        <div class="eyebrow">ВЫБРАННЫЙ ПРЕДМЕТ</div>
+        <h2 id="selected-subject" style="margin-top:6px">Математика</h2>
+        <p class="muted" id="subject-intro">Теория, практика и разбор ошибок — в одном месте.</p>
+        <button class="primary-btn full" id="selected-course-button" data-go="course">Открыть курс «Математика · ОГЭ» →</button>
+        <button class="outline-btn full" data-go="subjects">Все предметы</button>
+      </div>
+      <div class="section-head"><div><h2>Всё для подготовки</h2><p class="muted">Учись системно, а не наугад</p></div></div>
+      <div class="feature-grid">
+        <div class="feature"><div class="feature-icon">📘</div><strong>Теория</strong><small>Короткие понятные уроки</small></div>
+        <div class="feature"><div class="feature-icon">✍️</div><strong>Тесты</strong><small>Задания в формате экзамена</small></div>
+        <div class="feature"><div class="feature-icon">📊</div><strong>Прогресс</strong><small>Отслеживание результатов</small></div>
+        <div class="feature"><div class="feature-icon">🧠</div><strong>Работа над ошибками</strong><small>Разбор сложных вопросов</small></div>
+      </div>
+      <div class="callout">
+        <h2>Начни с диагностики</h2>
+        <p class="muted">Выбери предмет и пройди входной тест. В полноценной версии он поможет определить темы, которым стоит уделить больше внимания.</p>
+        <button class="outline-btn full" data-go="subjects">Посмотреть предметы</button>
+      </div>
+    </section>
+
+    <section id="subjects" class="page hidden">
+      <div class="section-head"><div><h2>Все предметы</h2><p class="muted" id="subjects-subtitle">Выбери дисциплину для подготовки к ОГЭ.</p></div></div>
+      <div class="subject-grid" id="subject-grid"></div>
+      <p class="muted" style="margin-top:13px">Набор предметов и учебных тем можно расширять по мере развития платформы.</p>
+    </section>
+
+    <section id="course" class="page hidden">
+      <div class="section-head">
+        <div><h2>Математика · ОГЭ 2027</h2><p class="muted">Полный курс подготовки EXAMLY</p></div>
+        <span class="beta">КУРС</span>
+      </div>
+      <div class="course-hero">
+        <div class="course-tag">📘 ПРОГРАММА ПО ФИПИ · 2027</div>
+        <h2 style="margin-top:12px">От основ до экзамена</h2>
+        <p class="muted">Изучай темы по порядку, решай задания и возвращайся к сложным вопросам. Результат сохраняется на этом устройстве.</p>
+        <div class="course-progress"><span id="course-progress-bar"></span></div>
+        <p class="muted" id="course-progress-text">Пройдено уроков: 0 из 1</p>
+      </div>
+      <div class="section-head"><div><h2>Программа курса</h2><p class="muted">Основные тематические блоки</p></div></div>
+      <article class="course-module active"><div class="course-module-top"><span class="module-number">01</span><div><h3>Числа и вычисления</h3><p>Дроби, проценты, степени, корни, действия с числами</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">02</span><div><h3>Алгебраические выражения</h3><p>Формулы, преобразования, многочлены, дробные выражения</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">03</span><div><h3>Уравнения и неравенства</h3><p>Линейные, квадратные уравнения, системы и неравенства</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">04</span><div><h3>Функции и графики</h3><p>Координаты, чтение графиков, свойства функций</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">05</span><div><h3>Геометрия</h3><p>Треугольники, четырёхугольники, окружности, площади</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">06</span><div><h3>Практические задачи и статистика</h3><p>Текстовые задачи, таблицы, диаграммы, вероятность</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">07</span><div><h3>Задания повышенной сложности</h3><p>Развёрнутые решения и задачи второй части</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">08</span><div><h3>Пробный экзамен</h3><p>Тренировка в формате ОГЭ и анализ результата</p></div></div></article>
+
+      <div class="lesson-card" id="lesson-one">
+        <div class="eyebrow">УРОК 1 · БАЗОВЫЙ УРОВЕНЬ</div>
+        <h3>Дроби, десятичные числа и проценты</h3>
+        <div class="lesson-text">
+          <p><strong>Обыкновенная дробь</strong> показывает, сколько равных частей взяли. В записи 3/4 число 3 — числитель, а 4 — знаменатель.</p>
+          <p><strong>Чтобы сложить дроби с разными знаменателями:</strong> приведи их к общему знаменателю, сложи числители и сохрани знаменатель.</p>
+          <div class="lesson-example"><strong>Пример</strong><br>1/2 + 1/4 = 2/4 + 1/4 = 3/4.</div>
+          <p><strong>Десятичная дробь</strong> записывается через запятую: 0,5 = 1/2.</p>
+          <p><strong>Процент</strong> — это одна сотая часть числа. Чтобы найти 15% от 200, вычисли 200 × 0,15 = 30.</p>
+          <div class="lesson-example"><strong>Запомни</strong><br>Чтобы найти p% от числа a, умножь a на p/100.</div>
+        </div>
+        <div class="source-note">Тематическая программа сверяется с кодификатором и демоверсией ОГЭ 2027. Теория и примеры ниже — авторские объяснения EXAMLY, а не дословная копия ФИПИ. <a href="https://fipi.ru/oge/demoversii-specifikacii-kodifikatory" target="_blank" rel="noopener noreferrer">Источник: официальный сайт ФИПИ ↗</a></div>
+      </div>
+
+      <div class="lesson-card">
+        <div class="section-head" style="margin-top:0"><div><h2>Проверь себя</h2><p class="muted">Выбери один ответ в каждом задании.</p></div></div>
+        <div class="quiz-question" data-question="0"><strong>1. Чему равно 3/4 + 1/8?</strong><div class="quiz-options"><button class="quiz-option" data-option="0">4/12</button><button class="quiz-option" data-option="1">7/8</button><button class="quiz-option" data-option="2">1/2</button><button class="quiz-option" data-option="3">5/8</button></div><div class="quiz-feedback hidden"></div></div>
+        <div class="quiz-question" data-question="1"><strong>2. Какая обыкновенная дробь равна 0,6?</strong><div class="quiz-options"><button class="quiz-option" data-option="0">1/6</button><button class="quiz-option" data-option="1">6/100</button><button class="quiz-option" data-option="2">3/5</button><button class="quiz-option" data-option="3">2/3</button></div><div class="quiz-feedback hidden"></div></div>
+        <div class="quiz-question" data-question="2"><strong>3. Найди 15% от 200.</strong><div class="quiz-options"><button class="quiz-option" data-option="0">15</button><button class="quiz-option" data-option="1">20</button><button class="quiz-option" data-option="2">25</button><button class="quiz-option" data-option="3">30</button></div><div class="quiz-feedback hidden"></div></div>
+        <button class="primary-btn full" id="check-lesson">Проверить ответы</button>
+        <button class="outline-btn full" id="reset-lesson">Пройти ещё раз</button>
+        <div class="quiz-result hidden" id="lesson-result" aria-live="polite"></div>
+      </div>
+      <button class="outline-btn full" data-go="subjects">← Назад к предметам</button>
+    </section>
+
+    <section id="russian-course" class="page hidden">
+      <div class="section-head">
+        <div><h2>Русский язык · ОГЭ 2027</h2><p class="muted">Полноценная подготовка EXAMLY</p></div>
+        <span class="beta">КУРС</span>
+      </div>
+      <div class="course-hero">
+        <div class="course-tag">✍️ ПРОГРАММА ПО ФИПИ · 2027</div>
+        <h2 style="margin-top:12px">Грамотность, текст и сочинение</h2>
+        <p class="muted">Разбирай правила, тренируй экзаменационные навыки и учись объяснять свои решения. Прогресс сохраняется на этом устройстве.</p>
+        <div class="course-progress"><span id="russian-progress-bar"></span></div>
+        <p class="muted" id="russian-progress-text">Пройдено уроков: 0 из 1 доступного урока</p>
+      </div>
+      <div class="section-head"><div><h2>Программа курса</h2><p class="muted">Основные направления подготовки</p></div></div>
+      <article class="course-module active"><div class="course-module-top"><span class="module-number">01</span><div><h3>Орфография</h3><p>НЕ и НИ, -тся и -ться, корни, приставки, суффиксы, Н и НН</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">02</span><div><h3>Пунктуация</h3><p>Однородные члены, обращения, вводные слова, сложные предложения</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">03</span><div><h3>Грамматика и синтаксис</h3><p>Части речи, словосочетания, грамматические основы, виды предложений</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">04</span><div><h3>Работа с текстом</h3><p>Тема, главная мысль, средства выразительности, смысловые связи</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">05</span><div><h3>Сжатое изложение</h3><p>Микротемы, способы сжатия, логика и точность передачи содержания</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">06</span><div><h3>Сочинение-рассуждение</h3><p>Тезис, примеры из текста, пояснения, вывод и критерии оценивания</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">07</span><div><h3>Итоговая практика</h3><p>Тренировочные варианты, самопроверка и разбор типичных ошибок</p></div></div></article>
+
+      <div class="lesson-card">
+        <div class="eyebrow">УРОК 1 · ОРФОГРАФИЯ</div>
+        <h3>Правописание -тся и -ться в глаголах</h3>
+        <div class="lesson-text">
+          <p>Чтобы выбрать <strong>-тся</strong> или <strong>-ться</strong>, задай вопрос к глаголу.</p>
+          <div class="lesson-example"><strong>Если вопрос «что делает?», «что сделает?»</strong><br>В самом вопросе нет мягкого знака — пишем <strong>-тся</strong>: ученик (что делает?) учится.</div>
+          <div class="lesson-example"><strong>Если вопрос «что делать?», «что сделать?»</strong><br>В вопросе есть мягкий знак — пишем <strong>-ться</strong>: ученик хочет (что делать?) учиться.</div>
+          <p><strong>Алгоритм:</strong> найди глагол → задай к нему вопрос → проверь, есть ли в вопросе мягкий знак → выбери написание.</p>
+          <p>Важно: ориентируйся на грамматический вопрос, а не на то, как слово звучит.</p>
+        </div>
+        <div class="source-note">Источник программы и экзаменационных требований: ФГБНУ «ФИПИ», демоверсия, спецификация и кодификатор ОГЭ 2027 по русскому языку. Теория и тренировочные примеры — авторские материалы EXAMLY, не дословная копия ФИПИ. <a href="https://fipi.ru/oge/demoversii-specifikacii-kodifikatory" target="_blank" rel="noopener noreferrer">Открыть официальный источник ФИПИ ↗</a></div>
+      </div>
+
+      <div class="lesson-card">
+        <div class="section-head" style="margin-top:0"><div><h2>Проверь себя</h2><p class="muted">Выбери правильный вариант.</p></div></div>
+        <div class="quiz-question" data-rus-question="0"><strong>1. Ученик хорошо (учится / учиться).</strong><div class="quiz-options"><button class="quiz-option" data-rus-option="0">учится</button><button class="quiz-option" data-rus-option="1">учиться</button></div><div class="quiz-feedback hidden"></div></div>
+        <div class="quiz-question" data-rus-question="1"><strong>2. Я хочу (готовится / готовиться) к экзамену.</strong><div class="quiz-options"><button class="quiz-option" data-rus-option="0">готовится</button><button class="quiz-option" data-rus-option="1">готовиться</button></div><div class="quiz-feedback hidden"></div></div>
+        <div class="quiz-question" data-rus-question="2"><strong>3. В каком предложении написание выбрано верно?</strong><div class="quiz-options"><button class="quiz-option" data-rus-option="0">Нужно хорошо готовится.</button><button class="quiz-option" data-rus-option="1">Он старается и хорошо учиться.</button><button class="quiz-option" data-rus-option="2">Он хочет учиться.</button><button class="quiz-option" data-rus-option="3">Ребёнок учиться в школе.</button></div><div class="quiz-feedback hidden"></div></div>
+        <button class="primary-btn full" id="check-russian-lesson">Проверить ответы</button>
+        <button class="outline-btn full" id="reset-russian-lesson">Пройти ещё раз</button>
+        <div class="quiz-result hidden" id="russian-lesson-result" aria-live="polite"></div>
+      </div>
+      <div class="source-note">Автоматическая проверка в этом уроке оценивает тестовые ответы. Изложение и сочинение будут проверяться отдельно по критериям ФИПИ; без полноценной проверки текста нельзя обещать точную экзаменационную оценку.</div>
+      <button class="outline-btn full" data-go="subjects">← Назад к предметам</button>
+    </section>
+
+    <section id="english-course" class="page hidden">
+      <div class="section-head">
+        <div><h2>Английский язык · ОГЭ 2027</h2><p class="muted">Полноценная подготовка EXAMLY</p></div>
+        <span class="beta">КУРС</span>
+      </div>
+      <div class="course-hero">
+        <div class="course-tag">🌍 ПРОГРАММА ПО ФИПИ · 2027</div>
+        <h2 style="margin-top:12px">Understand. Practise. Speak.</h2>
+        <p class="muted">Грамматика, словарный запас и четыре экзаменационных навыка: аудирование, чтение, письмо и говорение. Прогресс сохраняется на этом устройстве.</p>
+        <div class="course-progress"><span id="english-progress-bar"></span></div>
+        <p class="muted" id="english-progress-text">Пройдено уроков: 0 из 1 доступного урока</p>
+      </div>
+      <div class="section-head"><div><h2>Программа курса</h2><p class="muted">Главные направления подготовки</p></div></div>
+      <article class="course-module active"><div class="course-module-top"><span class="module-number">01</span><div><h3>Грамматика</h3><p>Времена, вопросы, отрицания, модальные глаголы, условные предложения</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">02</span><div><h3>Лексика</h3><p>Семья, школа, досуг, путешествия, здоровье, технологии и окружающий мир</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">03</span><div><h3>Аудирование · Listening</h3><p>Понимание основного содержания и нужной информации на слух</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">04</span><div><h3>Чтение · Reading</h3><p>Понимание текста, поиск деталей и соответствие заголовков</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">05</span><div><h3>Грамматика и словообразование</h3><p>Формы слов, части речи, преобразование и выбор правильной формы</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">06</span><div><h3>Письмо · Writing</h3><p>Электронное письмо: структура, ответы на вопросы, связность и проверка</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">07</span><div><h3>Говорение · Speaking</h3><p>Чтение вслух, вопросы по ситуации и тематическое монологическое высказывание</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">08</span><div><h3>Пробный экзамен</h3><p>Комплексная тренировка письменной и устной частей</p></div></div></article>
+
+      <div class="lesson-card">
+        <div class="eyebrow">УРОК 1 · GRAMMAR</div>
+        <h3>Present Simple или Present Continuous?</h3>
+        <div class="lesson-text">
+          <p><strong>Present Simple</strong> используем для привычек, регулярных действий и фактов. Частые маркеры: <em>usually, often, every day, always</em>.</p>
+          <div class="lesson-example"><strong>Пример</strong><br>I go to school every day. — Я хожу в школу каждый день.</div>
+          <p><strong>Present Continuous</strong> используем для действия, которое происходит сейчас или в текущий период. Частые маркеры: <em>now, at the moment, right now</em>.</p>
+          <div class="lesson-example"><strong>Пример</strong><br>She is doing her homework now. — Сейчас она делает домашнее задание.</div>
+          <p><strong>Формулы:</strong><br>Present Simple: I/you/we/they + V; he/she/it + V-s.<br>Present Continuous: am/is/are + глагол с окончанием -ing.</p>
+          <p><strong>Подсказка:</strong> сначала найди маркер времени, затем определи, речь о привычке или о действии прямо сейчас.</p>
+        </div>
+        <div class="source-note">Структура и направления подготовки сверены с демоверсией, спецификацией и кодификатором ОГЭ 2027 по английскому языку ФИПИ. Теория и тренировочные примеры — авторские материалы EXAMLY. <a href="https://fipi.ru/oge/demoversii-specifikacii-kodifikatory" target="_blank" rel="noopener noreferrer">Открыть официальный источник ФИПИ ↗</a></div>
+      </div>
+
+      <div class="lesson-card">
+        <div class="section-head" style="margin-top:0"><div><h2>Проверь себя</h2><p class="muted">Выбери правильный вариант.</p></div></div>
+        <div class="quiz-question" data-eng-question="0"><strong>1. My brother usually ___ football after school.</strong><div class="quiz-options"><button class="quiz-option" data-eng-option="0">play</button><button class="quiz-option" data-eng-option="1">plays</button><button class="quiz-option" data-eng-option="2">is playing</button><button class="quiz-option" data-eng-option="3">playing</button></div><div class="quiz-feedback hidden"></div></div>
+        <div class="quiz-question" data-eng-question="1"><strong>2. Look! The children ___ in the garden.</strong><div class="quiz-options"><button class="quiz-option" data-eng-option="0">run</button><button class="quiz-option" data-eng-option="1">runs</button><button class="quiz-option" data-eng-option="2">are running</button><button class="quiz-option" data-eng-option="3">is running</button></div><div class="quiz-feedback hidden"></div></div>
+        <div class="quiz-question" data-eng-question="2"><strong>3. Выбери правильное предложение.</strong><div class="quiz-options"><button class="quiz-option" data-eng-option="0">She go to school every day.</button><button class="quiz-option" data-eng-option="1">She going to school every day.</button><button class="quiz-option" data-eng-option="2">She is go to school every day.</button><button class="quiz-option" data-eng-option="3">She goes to school every day.</button></div><div class="quiz-feedback hidden"></div></div>
+        <button class="primary-btn full" id="check-english-lesson">Проверить ответы</button>
+        <button class="outline-btn full" id="reset-english-lesson">Пройти ещё раз</button>
+        <div class="quiz-result hidden" id="english-lesson-result" aria-live="polite"></div>
+      </div>
+      <div class="source-note">В этом уроке автоматически проверяются только тестовые ответы. Аудирование и устная речь требуют аудиоматериалов и записи голоса; письменные ответы оцениваются отдельно по критериям ФИПИ.</div>
+      <button class="outline-btn full" data-go="subjects">← Назад к предметам</button>
+    </section>
+
+
+    <section id="biology-course" class="page hidden">
+      <div class="section-head">
+        <div><h2>Биология · ОГЭ 2027</h2><p class="muted">Полноценная подготовка EXAMLY</p></div>
+        <span class="beta">КУРС</span>
+      </div>
+      <div class="course-hero">
+        <div class="course-tag">🧬 ПРОГРАММА ПО ФИПИ · 2027</div>
+        <h2 style="margin-top:12px">Понимай живое</h2>
+        <p class="muted">От клетки до экосистем: изучай основы, разбирай процессы и тренируйся на заданиях. Прогресс сохраняется на этом устройстве.</p>
+        <div class="course-progress"><span id="biology-progress-bar"></span></div>
+        <p class="muted" id="biology-progress-text">Пройдено уроков: 0 из 1 доступного урока</p>
+      </div>
+      <div class="section-head"><div><h2>Программа курса</h2><p class="muted">Основные направления подготовки</p></div></div>
+      <article class="course-module active"><div class="course-module-top"><span class="module-number">01</span><div><h3>Биология как наука. Клетка</h3><p>Методы биологии, клеточная теория, органоиды и деление клетки</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">02</span><div><h3>Организм человека</h3><p>Ткани, органы, системы органов и их взаимосвязь</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">03</span><div><h3>Растения, грибы и бактерии</h3><p>Строение, жизнедеятельность, размножение и значение</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">04</span><div><h3>Животные</h3><p>Основные группы, особенности строения и приспособления</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">05</span><div><h3>Наследственность и изменчивость</h3><p>ДНК, гены, хромосомы, наследование признаков</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">06</span><div><h3>Эволюция и многообразие жизни</h3><p>Развитие органического мира и систематика организмов</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">07</span><div><h3>Экология и биосфера</h3><p>Экосистемы, цепи питания, круговорот веществ и охрана природы</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">08</span><div><h3>Практика и пробный экзамен</h3><p>Работа с рисунками, таблицами, экспериментами и заданиями ОГЭ</p></div></div></article>
+
+      <div class="lesson-card">
+        <div class="eyebrow">УРОК 1 · ОСНОВЫ БИОЛОГИИ</div>
+        <h3>Клетка — основа живого</h3>
+        <div class="lesson-text">
+          <p><strong>Клетка</strong> — элементарная структурная и функциональная единица живого организма. Одни организмы состоят из одной клетки, другие — из множества специализированных клеток.</p>
+          <div class="lesson-example"><strong>Основные части клетки</strong><br>Мембрана отделяет клетку от среды и регулирует обмен веществ. Цитоплазма — внутренняя среда клетки. Ядро хранит основную часть наследственной информации и управляет процессами клетки.</div>
+          <p><strong>Органоиды:</strong> митохондрии участвуют в клеточном дыхании и обеспечении клетки энергией; рибосомы синтезируют белки; у растений хлоропласты обеспечивают фотосинтез.</p>
+          <div class="lesson-example"><strong>Растительная клетка</strong><br>Помимо общих для эукариот клеток структур, обычно имеет клеточную стенку, крупную центральную вакуоль и пластиды, включая хлоропласты.</div>
+          <p><strong>Важно:</strong> бактерии — прокариоты: у них нет оформленного ядра и мембранных органоидов.</p>
+        </div>
+        <div class="source-note">Тематические направления сверены с кодификатором и демоверсией ОГЭ 2027 по биологии. Теория и примеры — авторские объяснения EXAMLY. <a href="https://fipi.ru/oge/demoversii-specifikacii-kodifikatory" target="_blank" rel="noopener noreferrer">Источник: официальный сайт ФИПИ ↗</a></div>
+      </div>
+      <div class="lesson-card">
+        <div class="section-head" style="margin-top:0"><div><h2>Проверь себя</h2><p class="muted">Выбери правильный ответ.</p></div></div>
+        <div class="quiz-question" data-bio-question="0"><strong>1. Какая структура клетки содержит основную часть наследственной информации у растений и животных?</strong><div class="quiz-options"><button class="quiz-option" data-bio-option="0">Рибосома</button><button class="quiz-option" data-bio-option="1">Ядро</button><button class="quiz-option" data-bio-option="2">Клеточная мембрана</button><button class="quiz-option" data-bio-option="3">Вакуоль</button></div><div class="quiz-feedback hidden"></div></div>
+        <div class="quiz-question" data-bio-question="1"><strong>2. Где в растительной клетке происходит фотосинтез?</strong><div class="quiz-options"><button class="quiz-option" data-bio-option="0">В митохондриях</button><button class="quiz-option" data-bio-option="1">В ядре</button><button class="quiz-option" data-bio-option="2">В хлоропластах</button><button class="quiz-option" data-bio-option="3">В рибосомах</button></div><div class="quiz-feedback hidden"></div></div>
+        <div class="quiz-question" data-bio-question="2"><strong>3. Какой организм относится к прокариотам?</strong><div class="quiz-options"><button class="quiz-option" data-bio-option="0">Берёза</button><button class="quiz-option" data-bio-option="1">Амёба</button><button class="quiz-option" data-bio-option="2">Дрожжи</button><button class="quiz-option" data-bio-option="3">Бактерия</button></div><div class="quiz-feedback hidden"></div></div>
+        <button class="primary-btn full" id="check-biology-lesson">Проверить ответы</button>
+        <button class="outline-btn full" id="reset-biology-lesson">Пройти ещё раз</button>
+        <div class="quiz-result hidden" id="biology-lesson-result" aria-live="polite"></div>
+      </div>
+      <div class="source-note">Автоматически проверяются выбранные тестовые ответы. Задания для работы с микропрепаратами, экспериментами и развёрнутыми ответами будут добавляться отдельными практическими уроками.</div>
+      <button class="outline-btn full" data-go="subjects">← Назад к предметам</button>
+    </section>
+
+
+    <section id="physics-course" class="page hidden">
+      <div class="section-head">
+        <div><h2>Физика · ОГЭ 2027</h2><p class="muted">Полноценная подготовка EXAMLY</p></div>
+        <span class="beta">КУРС</span>
+      </div>
+      <div class="course-hero">
+        <div class="course-tag">⚛️ ПРОГРАММА ПО ФИПИ · 2027</div>
+        <h2 style="margin-top:12px">Разберись, как устроен мир</h2>
+        <p class="muted">Понимай физические явления, выбирай формулы, решай задачи и анализируй эксперименты. Прогресс сохраняется на этом устройстве.</p>
+        <div class="course-progress"><span id="physics-progress-bar"></span></div>
+        <p class="muted" id="physics-progress-text">Пройдено уроков: 0 из 1 доступного урока</p>
+      </div>
+      <div class="section-head"><div><h2>Программа курса</h2><p class="muted">Основные направления подготовки</p></div></div>
+      <article class="course-module active"><div class="course-module-top"><span class="module-number">01</span><div><h3>Механические явления</h3><p>Движение, скорость, ускорение, силы, давление, работа и мощность</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">02</span><div><h3>Тепловые явления</h3><p>Температура, внутренняя энергия, теплообмен и агрегатные состояния</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">03</span><div><h3>Электрические явления</h3><p>Заряд, ток, напряжение, сопротивление, закон Ома и цепи</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">04</span><div><h3>Магнитные явления</h3><p>Магнитное поле, электромагниты и электромагнитная индукция</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">05</span><div><h3>Световые явления</h3><p>Отражение, преломление, линзы и оптические приборы</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">06</span><div><h3>Квантовые явления</h3><p>Строение атома, радиоактивность и основы ядерной физики</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">07</span><div><h3>Измерения и эксперимент</h3><p>Единицы СИ, приборы, таблицы, графики и оценка погрешностей</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">08</span><div><h3>Практика и пробный экзамен</h3><p>Расчётные задачи, качественные вопросы и экспериментальные задания</p></div></div></article>
+
+      <div class="lesson-card">
+        <div class="eyebrow">УРОК 1 · МЕХАНИКА</div>
+        <h3>Плотность вещества</h3>
+        <div class="lesson-text">
+          <p><strong>Плотность</strong> показывает, какая масса вещества приходится на единицу объёма. Обозначается греческой буквой ρ (ро).</p>
+          <div class="lesson-example"><strong>Главная формула</strong><br>ρ = m / V<br>ρ — плотность, m — масса, V — объём.</div>
+          <p>Если известны плотность и объём, массу можно найти так: <strong>m = ρ × V</strong>. Если известны масса и плотность, объём: <strong>V = m / ρ</strong>.</p>
+          <div class="lesson-example"><strong>Пример</strong><br>Масса тела 200 г, объём 100 см³.<br>ρ = 200 / 100 = 2 г/см³.</div>
+          <p><strong>Единицы измерения:</strong> в СИ плотность выражают в кг/м³, массу — в кг, объём — в м³. Перед подстановкой величин проверь, что единицы согласованы.</p>
+          <p><strong>Подсказка:</strong> запомни треугольник формул: ρ = m/V, m = ρV, V = m/ρ.</p>
+        </div>
+        <div class="source-note">Тематические направления сверены с кодификатором, спецификацией и демоверсией ОГЭ 2027 по физике. Теория и тренировочные задачи — авторские материалы EXAMLY. <a href="https://fipi.ru/oge/demoversii-specifikacii-kodifikatory" target="_blank" rel="noopener noreferrer">Источник: официальный сайт ФИПИ ↗</a></div>
+      </div>
+      <div class="lesson-card">
+        <div class="section-head" style="margin-top:0"><div><h2>Проверь себя</h2><p class="muted">Выбери правильный ответ.</p></div></div>
+        <div class="quiz-question" data-phy-question="0"><strong>1. Как обозначают плотность вещества?</strong><div class="quiz-options"><button class="quiz-option" data-phy-option="0">F</button><button class="quiz-option" data-phy-option="1">ρ</button><button class="quiz-option" data-phy-option="2">A</button><button class="quiz-option" data-phy-option="3">I</button></div><div class="quiz-feedback hidden"></div></div>
+        <div class="quiz-question" data-phy-question="1"><strong>2. Масса тела 300 г, объём 100 см³. Чему равна плотность?</strong><div class="quiz-options"><button class="quiz-option" data-phy-option="0">0,3 г/см³</button><button class="quiz-option" data-phy-option="1">3 г/см³</button><button class="quiz-option" data-phy-option="2">30 г/см³</button><button class="quiz-option" data-phy-option="3">300 г/см³</button></div><div class="quiz-feedback hidden"></div></div>
+        <div class="quiz-question" data-phy-question="2"><strong>3. Как найти массу, если известны плотность и объём?</strong><div class="quiz-options"><button class="quiz-option" data-phy-option="0">m = ρ / V</button><button class="quiz-option" data-phy-option="1">m = V / ρ</button><button class="quiz-option" data-phy-option="2">m = ρ × V</button><button class="quiz-option" data-phy-option="3">m = ρ + V</button></div><div class="quiz-feedback hidden"></div></div>
+        <button class="primary-btn full" id="check-physics-lesson">Проверить ответы</button>
+        <button class="outline-btn full" id="reset-physics-lesson">Пройти ещё раз</button>
+        <div class="quiz-result hidden" id="physics-lesson-result" aria-live="polite"></div>
+      </div>
+      <div class="source-note">Автоматически проверяются выбранные тестовые ответы. В следующих уроках добавим задачи с вводом числового ответа и разбором формул.</div>
+      <button class="outline-btn full" data-go="subjects">← Назад к предметам</button>
+    </section>
+
+
+    <section id="chemistry-course" class="page hidden">
+      <div class="section-head">
+        <div><h2>Химия · ОГЭ 2027</h2><p class="muted">Полноценная подготовка EXAMLY</p></div>
+        <span class="beta">КУРС</span>
+      </div>
+      <div class="course-hero">
+        <div class="course-tag">🧪 ПРОГРАММА ПО ФИПИ · 2027</div>
+        <h2 style="margin-top:12px">Понимай вещества и реакции</h2>
+        <p class="muted">Изучай строение атома, свойства веществ, химические реакции и учись решать расчётные задачи. Прогресс сохраняется на этом устройстве.</p>
+        <div class="course-progress"><span id="chemistry-progress-bar"></span></div>
+        <p class="muted" id="chemistry-progress-text">Пройдено уроков: 0 из 1 доступного урока</p>
+      </div>
+      <div class="section-head"><div><h2>Программа курса</h2><p class="muted">Основные направления подготовки</p></div></div>
+      <article class="course-module active"><div class="course-module-top"><span class="module-number">01</span><div><h3>Атомы, элементы и периодический закон</h3><p>Строение атома, электронные оболочки, периодическая система</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">02</span><div><h3>Химическая связь и строение веществ</h3><p>Ионы, молекулы, кристаллические решётки и формулы веществ</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">03</span><div><h3>Классы неорганических веществ</h3><p>Оксиды, основания, кислоты и соли: состав и свойства</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">04</span><div><h3>Химические реакции</h3><p>Признаки реакций, уравнения, коэффициенты и типы реакций</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">05</span><div><h3>Металлы и неметаллы</h3><p>Физические и химические свойства, важнейшие соединения</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">06</span><div><h3>Растворы и электролитическая диссоциация</h3><p>Растворимость, ионы в растворах и реакции ионного обмена</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">07</span><div><h3>Цепочки превращений и качественные реакции</h3><p>Получение веществ, распознавание ионов и газов</p></div></div></article>
+      <article class="course-module"><div class="course-module-top"><span class="module-number">08</span><div><h3>Расчётные задачи и эксперимент</h3><p>Массовая доля, количество вещества, уравнения реакций и лабораторная практика</p></div></div></article>
+
+      <div class="lesson-card">
+        <div class="eyebrow">УРОК 1 · ОСНОВЫ ХИМИИ</div>
+        <h3>Атомы и химические элементы</h3>
+        <div class="lesson-text">
+          <p><strong>Атом</strong> — частица химического элемента. Он состоит из положительно заряженного ядра и электронов, движущихся вокруг ядра в электронной оболочке.</p>
+          <div class="lesson-example"><strong>Что находится в атоме?</strong><br>Протоны имеют положительный заряд (+), нейтроны не имеют заряда (0), электроны имеют отрицательный заряд (−). Протоны и нейтроны находятся в ядре.</div>
+          <p><strong>Порядковый номер элемента</strong> в периодической системе равен числу протонов в ядре. В нейтральном атоме число электронов равно числу протонов.</p>
+          <div class="lesson-example"><strong>Пример: натрий (Na)</strong><br>Порядковый номер натрия — 11. Значит, в ядре 11 протонов, а в нейтральном атоме 11 электронов. На электронных слоях они распределяются как 2, 8, 1.</div>
+          <p><strong>Массовое число</strong> — сумма протонов и нейтронов. Поэтому число нейтронов можно найти: массовое число − число протонов.</p>
+          <p><strong>Важно:</strong> если атом теряет или присоединяет электроны, образуется ион. Потеря электронов даёт положительный ион (катион), присоединение — отрицательный (анион).</p>
+        </div>
+        <div class="source-note">Программа курса сверяется с утверждёнными кодификатором, спецификацией и демоверсией ОГЭ 2027 по химии. Теория и примеры — авторские объяснения EXAMLY. <a href="https://fipi.ru/oge/demoversii-specifikacii-kodifikatory" target="_blank" rel="noopener noreferrer">Источник: официальный сайт ФИПИ ↗</a></div>
+      </div>
+      <div class="lesson-card">
+        <div class="section-head" style="margin-top:0"><div><h2>Проверь себя</h2><p class="muted">Выбери правильный ответ.</p></div></div>
+        <div class="quiz-question" data-chem-question="0"><strong>1. Какая частица имеет отрицательный заряд?</strong><div class="quiz-options"><button class="quiz-option" data-chem-option="0">Протон</button><button class="quiz-option" data-chem-option="1">Нейтрон</button><button class="quiz-option" data-chem-option="2">Электрон</button><button class="quiz-option" data-chem-option="3">Ядро</button></div><div class="quiz-feedback hidden"></div></div>
+        <div class="quiz-question" data-chem-question="1"><strong>2. Чему равен порядковый номер химического элемента?</strong><div class="quiz-options"><button class="quiz-option" data-chem-option="0">Числу нейтронов</button><button class="quiz-option" data-chem-option="1">Числу протонов</button><button class="quiz-option" data-chem-option="2">Сумме протонов и нейтронов</button><button class="quiz-option" data-chem-option="3">Числу электронных слоёв</button></div><div class="quiz-feedback hidden"></div></div>
+        <div class="quiz-question" data-chem-question="2"><strong>3. Сколько электронов в нейтральном атоме кислорода с порядковым номером 8?</strong><div class="quiz-options"><button class="quiz-option" data-chem-option="0">6</button><button class="quiz-option" data-chem-option="1">7</button><button class="quiz-option" data-chem-option="2">8</button><button class="quiz-option" data-chem-option="3">16</button></div><div class="quiz-feedback hidden"></div></div>
+        <button class="primary-btn full" id="check-chemistry-lesson">Проверить ответы</button>
+        <button class="outline-btn full" id="reset-chemistry-lesson">Пройти ещё раз</button>
+        <div class="quiz-result hidden" id="chemistry-lesson-result" aria-live="polite"></div>
+      </div>
+      <div class="source-note">Автоматически проверяются выбранные тестовые ответы. В следующих уроках добавим уравнения реакций, цепочки превращений, задачи и практику по распознаванию веществ.</div>
+      <button class="outline-btn full" data-go="subjects">← Назад к предметам</button>
+    </section>
+
+    <section id="tariffs" class="page hidden">
+      <div class="section-head"><div><h2>Тарифы EXAMLY</h2><p class="muted">Доступная подготовка без переплаты.</p></div></div>
+      <div class="period-switch" role="group" aria-label="Период оплаты">
+        <button class="active" data-period="month">Месяц</button>
+        <button data-period="year">Год · выгоднее</button>
+      </div>
+      <div class="pricing-grid" id="pricing-grid" style="margin-top:13px"></div>
+      <div class="notice">Демо-режим: оплата не подключена. Кнопки тарифов только показывают выбор и не списывают деньги. Не вводи здесь данные банковской карты.</div>
+      <div class="selection" id="plan-selection" aria-live="polite">Выбранный тариф: пока не выбран.</div>
+    </section>
+
+    <section id="faq" class="page hidden">
+      <div class="section-head">
+        <div><h2>Центр помощи</h2><p class="muted">Ответы на вопросы о работе EXAMLY.</p></div>
+      </div>
+      <div class="callout" style="margin-top:0">
+        <div class="eyebrow">EXAMLY HELP CENTER</div>
+        <h2 style="margin-top:6px">Чем можем помочь?</h2>
+        <p class="muted">Выбери вопрос, чтобы посмотреть ответ.</p>
+      </div>
+      <div class="section-head"><div><h2>Часто задаваемые вопросы</h2></div></div>
+      <div class="faq-list">
+        <article class="faq-item">
+          <button class="faq-question" type="button" aria-expanded="false"><span>Что такое EXAMLY?</span><span aria-hidden="true">⌄</span></button>
+          <div class="faq-answer hidden">EXAMLY — образовательный проект с интерфейсом для подготовки к ОГЭ и ЕГЭ. Сейчас приложение находится в бета-версии.</div>
+        </article>
+        <article class="faq-item">
+          <button class="faq-question" type="button" aria-expanded="false"><span>Как открыть приложение?</span><span aria-hidden="true">⌄</span></button>
+          <div class="faq-answer hidden">Открой чат с ботом @ExamlyLearnBot и нажми кнопку «Открыть EXAMLY» в меню Telegram.</div>
+        </article>
+        <article class="faq-item">
+          <button class="faq-question" type="button" aria-expanded="false"><span>Какие предметы представлены?</span><span aria-hidden="true">⌄</span></button>
+          <div class="faq-answer hidden">В каталоге бета-версии представлены 11 предметов: математика, русский язык, английский язык, информатика, физика, химия, биология, история, обществознание, география и литература.</div>
+        </article>
+        <article class="faq-item">
+          <button class="faq-question" type="button" aria-expanded="false"><span>Можно ли пользоваться с телефона?</span><span aria-hidden="true">⌄</span></button>
+          <div class="faq-answer hidden">Да. EXAMLY открывается внутри Telegram и в обычном браузере на телефоне, планшете или компьютере.</div>
+        </article>
+        <article class="faq-item">
+          <button class="faq-question" type="button" aria-expanded="false"><span>Работает ли оплата тарифов?</span><span aria-hidden="true">⌄</span></button>
+          <div class="faq-answer hidden">Нет. Сейчас тарифы показаны только в демонстрационном режиме. Оплата не подключена, деньги не списываются.</div>
+        </article>
+        <article class="faq-item">
+          <button class="faq-question" type="button" aria-expanded="false"><span>Что делать, если приложение не открывается?</span><span aria-hidden="true">⌄</span></button>
+          <div class="faq-answer hidden">Закрой и снова открой EXAMLY через меню бота. Если проблема останется, попробуй перезапустить Telegram и проверить подключение к интернету.</div>
+        </article>
+        <article class="faq-item">
+          <button class="faq-question" type="button" aria-expanded="false"><span>Куда сообщить об ошибке или задать вопрос?</span><span aria-hidden="true">⌄</span></button>
+          <div class="faq-answer hidden">Напиши в нашу поддержку в Telegram: @poderzhka_examly. Для этого открой вкладку «Поддержка».</div>
+        </article>
+      </div>
+    </section>
+
+    <section id="support" class="page hidden">
+      <div class="section-head">
+        <div><h2>🛟 Поддержка EXAMLY</h2><p class="muted">Мы готовы помочь с вопросами и сообщениями об ошибках.</p></div>
+      </div>
+      <div class="callout" style="margin-top:0">
+        <div class="eyebrow">EXAMLY SUPPORT</div>
+        <h2 style="margin-top:6px">Нужна помощь?</h2>
+        <p class="muted">Если у тебя возник вопрос или ты заметил ошибку в приложении, напиши нам в Telegram.</p>
+        <a class="primary-btn full" href="https://t.me/poderzhka_examly" target="_blank" rel="noopener noreferrer">💬 Написать в поддержку</a>
+        <p class="muted" style="margin-top:12px">Telegram: @poderzhka_examly</p>
+      </div>
+    </section>
+
+    <section id="about" class="page hidden">
+      <div class="section-head">
+        <div><h2>👨‍💻 О создателе</h2><p class="muted">Немного о человеке, стоящем за EXAMLY.</p></div>
+      </div>
+      <div class="callout" style="margin-top:0">
+        <div class="eyebrow">MEET THE CREATOR</div>
+        <h2 style="margin-top:6px">👋 Тимофей</h2>
+        <p class="muted">🚀 EXAMLY — образовательный проект для удобной подготовки к ОГЭ и ЕГЭ.</p>
+        <p class="muted">🎯 Моя цель — сделать обучение понятнее, подготовку эффективнее, а путь к хорошим результатам проще.</p>
+        <p class="muted">💙 Учись, развивайся и достигай большего вместе с EXAMLY!</p>
+      </div>
+    </section>
+
+    <footer><span>EXAMLY · BETA PREVIEW</span><span>Учись. Тренируйся. Сдавай.</span></footer>
+  </main>
+
+  <script>
+    "use strict";
+
+    // Демо-интерфейс: без сетевых запросов, аналитики, cookies и платёжных операций.
+    const subjects = [
+      { name:"Математика", desc:"Алгебра · геометрия · задачи", icon:`<path d="M5 5h14v14H5z"/><path d="M8 9h8M8 15h3m2-2 3 3m0-3-3 3"/>`, color:"#7898ff" },
+      { name:"Русский язык", desc:"Правила · сочинение · тесты", icon:`<path d="M6 4h12v16H6z"/><path d="M9 8h6M9 12h6M9 16h4"/>`, color:"#ff718b" },
+      { name:"Английский", desc:"Grammar · Reading · Listening", icon:`<path d="M4 6h16M12 4v2m-5 0c0 6 3 9 8 11m-7-6c1 2 3 4 6 5M5 20l5-7"/>`, color:"#ae91ff" },
+      { name:"Информатика", desc:"Алгоритмы · код · теория", icon:`<rect x="4" y="5" width="16" height="11" rx="2"/><path d="M8 20h8m-4-4v4M8 9l2 2-2 2m5 0h3"/>`, color:"#39cbb8" },
+      { name:"Физика", desc:"Формулы · задачи · эксперименты", icon:`<circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="9" ry="4.5"/><ellipse cx="12" cy="12" rx="9" ry="4.5" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="4.5" transform="rotate(120 12 12)"/>`, color:"#f4a64b" },
+      { name:"Химия", desc:"Реакции · формулы · вещества", icon:`<path d="M9 4h6m-5 0v6l-5 8a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-8V4"/><path d="M7 16h10m-7-3h4"/>`, color:"#55c7f2" },
+      { name:"Биология", desc:"Анатомия · генетика · ботаника", icon:`<path d="M19 5C10 4 5 8 5 14a5 5 0 0 0 5 5c6 0 10-5 9-14Z"/><path d="M4 20c3-5 7-8 12-11m-7 8 1-4m4 0 3 1"/>`, color:"#77c98b" },
+      { name:"История", desc:"Даты · события · личности", icon:`<path d="M4 7h16M6 7v12m4-12v12m4-12v12m4-12v12M4 19h16M3 5l9-3 9 3"/>`, color:"#d9a56f" },
+      { name:"Обществознание", desc:"Право · экономика · общество", icon:`<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0m1-4a4 4 0 0 1 5 4"/>`, color:"#e18ac6" },
+      { name:"География", desc:"Карты · страны · климат", icon:`<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>`, color:"#49b9a5" },
+      { name:"Литература", desc:"Произведения · авторы · анализ", icon:`<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11M9 8h6m-6 4h5"/>`, color:"#c49bff" }
+    ];
+
+    const plans = [
+      { name:"Бесплатный", month:0, year:0, badge:"Попробуй", desc:"Чтобы познакомиться с платформой.", features:["Базовые уроки","Ограниченное количество тестов","Базовый прогресс"] },
+      { name:"Старт", month:99, year:950, badge:"Для начала", desc:"Больше практики и системная подготовка.", features:["Всё из бесплатного","Тесты по выбранному предмету","Подробные объяснения ответов"] },
+      { name:"Плюс", month:199, year:1910, badge:"Популярный", desc:"Для тех, кто хочет готовиться серьёзно.", features:["Всё из тарифа Старт","Все предметы и темы","Персональный план подготовки","Статистика ошибок и прогресса","Повторение сложных заданий"], popular:true },
+      { name:"Максимум", month:349, year:3350, badge:"Полный доступ", desc:"Расширенные инструменты подготовки.", features:["Всё из тарифа Плюс","Расширенная аналитика","Больше тренировочных режимов","Приоритетный доступ к новым функциям"] }
+    ];
+
+    let currentExam = "ОГЭ";
+    let currentSubject = "Математика";
+    let currentTab = "home";
+
+    // Telegram Mini App: безопасная инициализация без изменения дизайна сайта.
+    const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (tg) {
+      document.body.classList.add("telegram-mini-app");
+      const updateTelegramSafeArea = () => {
+        const inset = tg.contentSafeAreaInset && Number.isFinite(tg.contentSafeAreaInset.top)
+          ? tg.contentSafeAreaInset.top
+          : 24;
+        document.documentElement.style.setProperty("--tg-content-safe-top", `${Math.max(24, inset)}px`);
+      };
+      updateTelegramSafeArea();
+      if (tg.onEvent) {
+        tg.onEvent("safeAreaChanged", updateTelegramSafeArea);
+        tg.onEvent("contentSafeAreaChanged", updateTelegramSafeArea);
+      }
+      tg.ready();
+      tg.expand();
+      try {
+        tg.setHeaderColor("#090e1b");
+        tg.setBackgroundColor("#090e1b");
+      } catch (_) {}
+      if (tg.BackButton) {
+        tg.BackButton.onClick(() => {
+          if (currentTab !== "home") showTab("home");
+          else if (tg.close) tg.close();
+        });
+      }
+    }
+    let currentPeriod = "month";
+    let chosenPlan = "";
+
+    const $ = (selector) => document.querySelector(selector);
+
+    function renderSubjects() {
+      $("#subject-grid").innerHTML = subjects.map((s) => `
+        <button class="subject ${s.name === currentSubject ? "selected" : ""}"
+          style="--subject-color:${s.color}" data-subject="${s.name}"
+          aria-pressed="${s.name === currentSubject}">
+          <span class="subject-top"><span class="subject-icon"><svg viewBox="0 0 24 24" aria-hidden="true">${s.icon}</svg></span><span aria-hidden="true">↗</span></span>
+          <span class="subject-name">${s.name}</span>
+          <span class="subject-desc">${s.desc}</span>
+        </button>`).join("");
+    }
+
+    function renderPlans() {
+      $("#pricing-grid").innerHTML = plans.map((p) => {
+        const price = p[currentPeriod];
+        const priceText = price === 0 ? "0 ₽" : `${price.toLocaleString("ru-RU")} ₽`;
+        const periodText = price === 0 ? "навсегда" : (currentPeriod === "month" ? "в месяц" : "в год");
+        return `<article class="plan ${p.popular ? "popular" : ""}">
+          <div class="eyebrow">${p.badge}</div>
+          <h3>${p.name}</h3>
+          <div class="price">${priceText}</div><div class="period">${periodText}</div>
+          <p>${p.desc}</p>
+          <ul>${p.features.map(f => `<li>${f}</li>`).join("")}</ul>
+          <button class="${p.popular ? "primary-btn" : "outline-btn"} full" data-plan="${p.name}">
+            ${p.name === "Бесплатный" ? "Выбрать бесплатно" : "Выбрать тариф"}
+          </button>
+        </article>`;
+      }).join("");
+    }
+
+    const lessonAnswers = {};
+    const lessonCorrect = [1, 2, 3];
+    const lessonExplanations = [
+      "Верно: 3/4 = 6/8, поэтому 6/8 + 1/8 = 7/8. Сначала привели дроби к общему знаменателю.",
+      "Верно: 0,6 = 6/10. Сократим числитель и знаменатель на 2: получим 3/5.",
+      "Верно: 15% = 0,15. Умножаем 200 × 0,15 = 30."
+    ];
+
+    function updateCourseProgress() {
+      let completed = false;
+      try { completed = localStorage.getItem("examly_math_oge_lesson1") === "done"; } catch (_) {}
+      const bar = document.getElementById("course-progress-bar");
+      const label = document.getElementById("course-progress-text");
+      if (bar) bar.style.width = completed ? "100%" : "0%";
+      if (label) label.textContent = completed ? "Пройдено: 1 из 1 доступного урока · результат сохранён на устройстве" : "Пройдено уроков: 0 из 1 доступного урока";
+    }
+
+    function resetLesson() {
+      Object.keys(lessonAnswers).forEach(key => delete lessonAnswers[key]);
+      document.querySelectorAll(".quiz-option").forEach(button => button.classList.remove("selected", "correct", "wrong"));
+      document.querySelectorAll(".quiz-feedback").forEach(el => { el.classList.add("hidden"); el.textContent = ""; });
+      document.getElementById("lesson-result").classList.add("hidden");
+    }
+
+    function checkLesson() {
+      let score = 0;
+      document.querySelectorAll(".quiz-question").forEach((question, index) => {
+        const selected = lessonAnswers[index];
+        const feedback = question.querySelector(".quiz-feedback");
+        const buttons = question.querySelectorAll(".quiz-option");
+        buttons.forEach((button, optionIndex) => {
+          button.classList.remove("correct", "wrong");
+          if (optionIndex === lessonCorrect[index]) button.classList.add("correct");
+          if (selected === optionIndex && selected !== lessonCorrect[index]) button.classList.add("wrong");
+        });
+        feedback.classList.remove("hidden");
+        if (selected === undefined) {
+          feedback.textContent = "Ответ не выбран. " + lessonExplanations[index];
+        } else if (selected === lessonCorrect[index]) {
+          score++;
+          feedback.textContent = "Правильно! " + lessonExplanations[index];
+        } else {
+          feedback.textContent = "Пока неверно. " + lessonExplanations[index];
+        }
+      });
+      const result = document.getElementById("lesson-result");
+      result.classList.remove("hidden");
+      if (score >= 2) {
+        result.textContent = `Результат: ${score} из 3. Отличная работа! Урок засчитан.`;
+        try { localStorage.setItem("examly_math_oge_lesson1", "done"); } catch (_) {}
+      } else {
+        result.textContent = `Результат: ${score} из 3. Посмотри объяснения ошибок и попробуй ещё раз. Для прохождения нужно набрать не менее 2 правильных ответов.`;
+      }
+      updateCourseProgress();
+    }
+
+    const russianAnswers = {};
+    const russianCorrect = [0, 1, 2];
+    const russianExplanations = [
+      "Правильно: ученик (что делает?) учится. В вопросе нет мягкого знака, поэтому пишем -тся.",
+      "Правильно: хочу (что делать?) готовиться. В вопросе есть мягкий знак, поэтому пишем -ться.",
+      "Верно: хочет (что делать?) учиться — в вопросе есть мягкий знак, значит, пишем -ться. В остальных вариантах вопрос и написание не совпадают."
+    ];
+
+    function updateRussianProgress() {
+      let completed = false;
+      try { completed = localStorage.getItem("examly_russian_oge_lesson1") === "done"; } catch (_) {}
+      const bar = document.getElementById("russian-progress-bar");
+      const label = document.getElementById("russian-progress-text");
+      if (bar) bar.style.width = completed ? "100%" : "0%";
+      if (label) label.textContent = completed ? "Пройдено: 1 из 1 доступного урока · результат сохранён на устройстве" : "Пройдено уроков: 0 из 1 доступного урока";
+    }
+
+    function resetRussianLesson() {
+      Object.keys(russianAnswers).forEach(key => delete russianAnswers[key]);
+      document.querySelectorAll("[data-rus-question] .quiz-option").forEach(button => button.classList.remove("selected", "correct", "wrong"));
+      document.querySelectorAll("[data-rus-question] .quiz-feedback").forEach(el => { el.classList.add("hidden"); el.textContent = ""; });
+      document.getElementById("russian-lesson-result").classList.add("hidden");
+    }
+
+    function checkRussianLesson() {
+      let score = 0;
+      document.querySelectorAll("[data-rus-question]").forEach((question, index) => {
+        const selected = russianAnswers[index];
+        const feedback = question.querySelector(".quiz-feedback");
+        const buttons = question.querySelectorAll(".quiz-option");
+        buttons.forEach((button, optionIndex) => {
+          button.classList.remove("correct", "wrong");
+          if (optionIndex === russianCorrect[index]) button.classList.add("correct");
+          if (selected === optionIndex && selected !== russianCorrect[index]) button.classList.add("wrong");
+        });
+        feedback.classList.remove("hidden");
+        if (selected === undefined) feedback.textContent = "Ответ не выбран. " + russianExplanations[index];
+        else if (selected === russianCorrect[index]) { score++; feedback.textContent = "Правильно! " + russianExplanations[index]; }
+        else feedback.textContent = "Пока неверно. " + russianExplanations[index];
+      });
+      const result = document.getElementById("russian-lesson-result");
+      result.classList.remove("hidden");
+      if (score >= 2) {
+        result.textContent = `Результат: ${score} из 3. Урок засчитан!`;
+        try { localStorage.setItem("examly_russian_oge_lesson1", "done"); } catch (_) {}
+      } else result.textContent = `Результат: ${score} из 3. Изучи объяснения и попробуй ещё раз. Для прохождения нужно не менее 2 правильных ответов.`;
+      updateRussianProgress();
+    }
+
+    const englishAnswers = {};
+    const englishCorrect = [1, 2, 3];
+    const englishExplanations = [
+      "Правильно: My brother — he, поэтому в Present Simple к глаголу добавляем -s: plays. Usually указывает на привычное действие.",
+      "Верно: Look! показывает, что действие происходит сейчас. Нужна форма Present Continuous: are running.",
+      "Верно: с she в Present Simple используем глагол с окончанием -s: goes."
+    ];
+
+    function updateEnglishProgress() {
+      let completed = false;
+      try { completed = localStorage.getItem("examly_english_oge_lesson1") === "done"; } catch (_) {}
+      const bar = document.getElementById("english-progress-bar");
+      const label = document.getElementById("english-progress-text");
+      if (bar) bar.style.width = completed ? "100%" : "0%";
+      if (label) label.textContent = completed ? "Пройдено: 1 из 1 доступного урока · результат сохранён на устройстве" : "Пройдено уроков: 0 из 1 доступного урока";
+    }
+
+    function resetEnglishLesson() {
+      Object.keys(englishAnswers).forEach(key => delete englishAnswers[key]);
+      document.querySelectorAll("[data-eng-question] .quiz-option").forEach(button => button.classList.remove("selected", "correct", "wrong"));
+      document.querySelectorAll("[data-eng-question] .quiz-feedback").forEach(el => { el.classList.add("hidden"); el.textContent = ""; });
+      document.getElementById("english-lesson-result").classList.add("hidden");
+    }
+
+    function checkEnglishLesson() {
+      let score = 0;
+      document.querySelectorAll("[data-eng-question]").forEach((question, index) => {
+        const selected = englishAnswers[index];
+        const feedback = question.querySelector(".quiz-feedback");
+        const buttons = question.querySelectorAll(".quiz-option");
+        buttons.forEach((button, optionIndex) => {
+          button.classList.remove("correct", "wrong");
+          if (optionIndex === englishCorrect[index]) button.classList.add("correct");
+          if (selected === optionIndex && selected !== englishCorrect[index]) button.classList.add("wrong");
+        });
+        feedback.classList.remove("hidden");
+        if (selected === undefined) feedback.textContent = "Ответ не выбран. " + englishExplanations[index];
+        else if (selected === englishCorrect[index]) { score++; feedback.textContent = "Correct! " + englishExplanations[index]; }
+        else feedback.textContent = "Not quite. " + englishExplanations[index];
+      });
+      const result = document.getElementById("english-lesson-result");
+      result.classList.remove("hidden");
+      if (score >= 2) {
+        result.textContent = `Результат: ${score} из 3. Отлично! Урок засчитан.`;
+        try { localStorage.setItem("examly_english_oge_lesson1", "done"); } catch (_) {}
+      } else result.textContent = `Результат: ${score} из 3. Изучи объяснения и попробуй ещё раз. Для прохождения нужно не менее 2 правильных ответов.`;
+      updateEnglishProgress();
+    }
+
+
+    const biologyAnswers = {};
+    const biologyCorrect = [1, 2, 3];
+    const biologyExplanations = [
+      "Верно: у эукариот основная часть наследственной информации находится в ядре клетки.",
+      "Правильно: фотосинтез у растений происходит в хлоропластах, содержащих хлорофилл.",
+      "Верно: бактерии — прокариоты, у них нет оформленного ядра."
+    ];
+
+    function updateBiologyProgress() {
+      let completed = false;
+      try { completed = localStorage.getItem("examly_biology_oge_lesson1") === "done"; } catch (_) {}
+      const bar = document.getElementById("biology-progress-bar");
+      const label = document.getElementById("biology-progress-text");
+      if (bar) bar.style.width = completed ? "100%" : "0%";
+      if (label) label.textContent = completed ? "Пройдено: 1 из 1 доступного урока · результат сохранён на устройстве" : "Пройдено уроков: 0 из 1 доступного урока";
+    }
+
+    function resetBiologyLesson() {
+      Object.keys(biologyAnswers).forEach(key => delete biologyAnswers[key]);
+      document.querySelectorAll("[data-bio-question] .quiz-option").forEach(button => button.classList.remove("selected", "correct", "wrong"));
+      document.querySelectorAll("[data-bio-question] .quiz-feedback").forEach(el => { el.classList.add("hidden"); el.textContent = ""; });
+      document.getElementById("biology-lesson-result").classList.add("hidden");
+    }
+
+    function checkBiologyLesson() {
+      let score = 0;
+      document.querySelectorAll("[data-bio-question]").forEach((question, index) => {
+        const selected = biologyAnswers[index];
+        const feedback = question.querySelector(".quiz-feedback");
+        const buttons = question.querySelectorAll(".quiz-option");
+        buttons.forEach((button, optionIndex) => {
+          button.classList.remove("correct", "wrong");
+          if (optionIndex === biologyCorrect[index]) button.classList.add("correct");
+          if (selected === optionIndex && selected !== biologyCorrect[index]) button.classList.add("wrong");
+        });
+        feedback.classList.remove("hidden");
+        if (selected === undefined) feedback.textContent = "Ответ не выбран. " + biologyExplanations[index];
+        else if (selected === biologyCorrect[index]) { score++; feedback.textContent = "Правильно! " + biologyExplanations[index]; }
+        else feedback.textContent = "Пока неверно. " + biologyExplanations[index];
+      });
+      const result = document.getElementById("biology-lesson-result");
+      result.classList.remove("hidden");
+      if (score >= 2) {
+        result.textContent = `Результат: ${score} из 3. Урок засчитан!`;
+        try { localStorage.setItem("examly_biology_oge_lesson1", "done"); } catch (_) {}
+      } else result.textContent = `Результат: ${score} из 3. Изучи объяснения и попробуй ещё раз. Для прохождения нужно не менее 2 правильных ответов.`;
+      updateBiologyProgress();
+    }
+
+    const physicsAnswers = {};
+    const physicsCorrect = [1, 1, 2];
+    const physicsExplanations = [
+      "Верно: плотность обозначают греческой буквой ρ (ро).",
+      "Правильно: ρ = m/V = 300 г / 100 см³ = 3 г/см³.",
+      "Верно: массу вычисляют по формуле m = ρ × V."
+    ];
+
+    function updatePhysicsProgress() {
+      let completed = false;
+      try { completed = localStorage.getItem("examly_physics_oge_lesson1") === "done"; } catch (_) {}
+      const bar = document.getElementById("physics-progress-bar");
+      const label = document.getElementById("physics-progress-text");
+      if (bar) bar.style.width = completed ? "100%" : "0%";
+      if (label) label.textContent = completed ? "Пройдено: 1 из 1 доступного урока · результат сохранён на устройстве" : "Пройдено уроков: 0 из 1 доступного урока";
+    }
+
+    function resetPhysicsLesson() {
+      Object.keys(physicsAnswers).forEach(key => delete physicsAnswers[key]);
+      document.querySelectorAll("[data-phy-question] .quiz-option").forEach(button => button.classList.remove("selected", "correct", "wrong"));
+      document.querySelectorAll("[data-phy-question] .quiz-feedback").forEach(el => { el.classList.add("hidden"); el.textContent = ""; });
+      document.getElementById("physics-lesson-result").classList.add("hidden");
+    }
+
+    function checkPhysicsLesson() {
+      let score = 0;
+      document.querySelectorAll("[data-phy-question]").forEach((question, index) => {
+        const selected = physicsAnswers[index];
+        const feedback = question.querySelector(".quiz-feedback");
+        const buttons = question.querySelectorAll(".quiz-option");
+        buttons.forEach((button, optionIndex) => {
+          button.classList.remove("correct", "wrong");
+          if (optionIndex === physicsCorrect[index]) button.classList.add("correct");
+          if (selected === optionIndex && selected !== physicsCorrect[index]) button.classList.add("wrong");
+        });
+        feedback.classList.remove("hidden");
+        if (selected === undefined) feedback.textContent = "Ответ не выбран. " + physicsExplanations[index];
+        else if (selected === physicsCorrect[index]) { score++; feedback.textContent = "Правильно! " + physicsExplanations[index]; }
+        else feedback.textContent = "Пока неверно. " + physicsExplanations[index];
+      });
+      const result = document.getElementById("physics-lesson-result");
+      result.classList.remove("hidden");
+      if (score >= 2) {
+        result.textContent = `Результат: ${score} из 3. Урок засчитан!`;
+        try { localStorage.setItem("examly_physics_oge_lesson1", "done"); } catch (_) {}
+      } else result.textContent = `Результат: ${score} из 3. Изучи объяснения и попробуй ещё раз. Для прохождения нужно не менее 2 правильных ответов.`;
+      updatePhysicsProgress();
+    }
+
+
+    const chemistryAnswers = {};
+    const chemistryCorrect = [2, 1, 2];
+    const chemistryExplanations = [
+      "Верно: электрон имеет отрицательный электрический заряд.",
+      "Правильно: порядковый номер элемента равен числу протонов в ядре атома.",
+      "Верно: нейтральный атом кислорода имеет 8 протонов и 8 электронов."
+    ];
+
+    function updateChemistryProgress() {
+      let completed = false;
+      try { completed = localStorage.getItem("examly_chemistry_oge_lesson1") === "done"; } catch (_) {}
+      const bar = document.getElementById("chemistry-progress-bar");
+      const label = document.getElementById("chemistry-progress-text");
+      if (bar) bar.style.width = completed ? "100%" : "0%";
+      if (label) label.textContent = completed ? "Пройдено: 1 из 1 доступного урока · результат сохранён на устройстве" : "Пройдено уроков: 0 из 1 доступного урока";
+    }
+
+    function resetChemistryLesson() {
+      Object.keys(chemistryAnswers).forEach(key => delete chemistryAnswers[key]);
+      document.querySelectorAll("[data-chem-question] .quiz-option").forEach(button => button.classList.remove("selected", "correct", "wrong"));
+      document.querySelectorAll("[data-chem-question] .quiz-feedback").forEach(el => { el.classList.add("hidden"); el.textContent = ""; });
+      document.getElementById("chemistry-lesson-result").classList.add("hidden");
+    }
+
+    function checkChemistryLesson() {
+      let score = 0;
+      document.querySelectorAll("[data-chem-question]").forEach((question, index) => {
+        const selected = chemistryAnswers[index];
+        const feedback = question.querySelector(".quiz-feedback");
+        const buttons = question.querySelectorAll(".quiz-option");
+        buttons.forEach((button, optionIndex) => {
+          button.classList.remove("correct", "wrong");
+          if (optionIndex === chemistryCorrect[index]) button.classList.add("correct");
+          if (selected === optionIndex && selected !== chemistryCorrect[index]) button.classList.add("wrong");
+        });
+        feedback.classList.remove("hidden");
+        if (selected === undefined) feedback.textContent = "Ответ не выбран. " + chemistryExplanations[index];
+        else if (selected === chemistryCorrect[index]) { score++; feedback.textContent = "Правильно! " + chemistryExplanations[index]; }
+        else feedback.textContent = "Пока неверно. " + chemistryExplanations[index];
+      });
+      const result = document.getElementById("chemistry-lesson-result");
+      result.classList.remove("hidden");
+      if (score >= 2) {
+        result.textContent = `Результат: ${score} из 3. Урок засчитан!`;
+        try { localStorage.setItem("examly_chemistry_oge_lesson1", "done"); } catch (_) {}
+      } else result.textContent = `Результат: ${score} из 3. Изучи объяснения и попробуй ещё раз. Для прохождения нужно не менее 2 правильных ответов.`;
+      updateChemistryProgress();
+    }
+
+    function showTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll(".page").forEach(el => el.classList.toggle("hidden", el.id !== tab));
+      document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.tab === tab));
+      if (tab === "subjects") renderSubjects();
+      if (tab === "tariffs") renderPlans();
+      if (tab === "course") updateCourseProgress();
+      if (tab === "russian-course") updateRussianProgress();
+      if (tab === "english-course") updateEnglishProgress();
+      if (tab === "biology-course") updateBiologyProgress();
+      if (tab === "physics-course") updatePhysicsProgress();
+      if (tab === "chemistry-course") updateChemistryProgress();
+      if (tg && tg.BackButton) {
+        if (tab === "home") tg.BackButton.hide();
+        else tg.BackButton.show();
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    document.addEventListener("click", (event) => {
+      const tabButton = event.target.closest("[data-tab]");
+      const goButton = event.target.closest("[data-go]");
+      const examButton = event.target.closest("[data-exam]");
+      const subjectButton = event.target.closest("[data-subject]");
+      const periodButton = event.target.closest("[data-period]");
+      const planButton = event.target.closest("[data-plan]");
+      const faqButton = event.target.closest(".faq-question");
+      const answerButton = event.target.closest("[data-option]");
+      const checkButton = event.target.closest("#check-lesson");
+      const resetButton = event.target.closest("#reset-lesson");
+      const russianAnswerButton = event.target.closest("[data-rus-option]");
+      const checkRussianButton = event.target.closest("#check-russian-lesson");
+      const resetRussianButton = event.target.closest("#reset-russian-lesson");
+      const englishAnswerButton = event.target.closest("[data-eng-option]");
+      const checkEnglishButton = event.target.closest("#check-english-lesson");
+      const resetEnglishButton = event.target.closest("#reset-english-lesson");
+      const biologyAnswerButton = event.target.closest("[data-bio-option]");
+      const checkBiologyButton = event.target.closest("#check-biology-lesson");
+      const resetBiologyButton = event.target.closest("#reset-biology-lesson");
+      const physicsAnswerButton = event.target.closest("[data-phy-option]");
+      const checkPhysicsButton = event.target.closest("#check-physics-lesson");
+      const resetPhysicsButton = event.target.closest("#reset-physics-lesson");
+      const chemistryAnswerButton = event.target.closest("[data-chem-option]");
+      const checkChemistryButton = event.target.closest("#check-chemistry-lesson");
+      const resetChemistryButton = event.target.closest("#reset-chemistry-lesson");
+
+      if (answerButton) {
+        const question = answerButton.closest(".quiz-question");
+        const questionIndex = Number(question.dataset.question);
+        lessonAnswers[questionIndex] = Number(answerButton.dataset.option);
+        question.querySelectorAll(".quiz-option").forEach(button => button.classList.toggle("selected", button === answerButton));
+        question.querySelector(".quiz-feedback").classList.add("hidden");
+        document.getElementById("lesson-result").classList.add("hidden");
+      }
+      if (checkButton) checkLesson();
+      if (resetButton) resetLesson();
+      if (russianAnswerButton) {
+        const question = russianAnswerButton.closest("[data-rus-question]");
+        const questionIndex = Number(question.dataset.rusQuestion);
+        russianAnswers[questionIndex] = Number(russianAnswerButton.dataset.rusOption);
+        question.querySelectorAll(".quiz-option").forEach(button => button.classList.toggle("selected", button === russianAnswerButton));
+        question.querySelector(".quiz-feedback").classList.add("hidden");
+        document.getElementById("russian-lesson-result").classList.add("hidden");
+      }
+      if (checkRussianButton) checkRussianLesson();
+      if (resetRussianButton) resetRussianLesson();
+      if (englishAnswerButton) {
+        const question = englishAnswerButton.closest("[data-eng-question]");
+        const questionIndex = Number(question.dataset.engQuestion);
+        englishAnswers[questionIndex] = Number(englishAnswerButton.dataset.engOption);
+        question.querySelectorAll(".quiz-option").forEach(button => button.classList.toggle("selected", button === englishAnswerButton));
+        question.querySelector(".quiz-feedback").classList.add("hidden");
+        document.getElementById("english-lesson-result").classList.add("hidden");
+      }
+      if (checkEnglishButton) checkEnglishLesson();
+      if (resetEnglishButton) resetEnglishLesson();
+      if (biologyAnswerButton) {
+        const question = biologyAnswerButton.closest("[data-bio-question]");
+        const questionIndex = Number(question.dataset.bioQuestion);
+        biologyAnswers[questionIndex] = Number(biologyAnswerButton.dataset.bioOption);
+        question.querySelectorAll(".quiz-option").forEach(button => button.classList.toggle("selected", button === biologyAnswerButton));
+        question.querySelector(".quiz-feedback").classList.add("hidden");
+        document.getElementById("biology-lesson-result").classList.add("hidden");
+      }
+      if (checkBiologyButton) checkBiologyLesson();
+      if (resetBiologyButton) resetBiologyLesson();
+      if (physicsAnswerButton) {
+        const question = physicsAnswerButton.closest("[data-phy-question]");
+        const questionIndex = Number(question.dataset.phyQuestion);
+        physicsAnswers[questionIndex] = Number(physicsAnswerButton.dataset.phyOption);
+        question.querySelectorAll(".quiz-option").forEach(button => button.classList.toggle("selected", button === physicsAnswerButton));
+        question.querySelector(".quiz-feedback").classList.add("hidden");
+        document.getElementById("physics-lesson-result").classList.add("hidden");
+      }
+      if (checkPhysicsButton) checkPhysicsLesson();
+      if (resetPhysicsButton) resetPhysicsLesson();
+      if (chemistryAnswerButton) {
+        const question = chemistryAnswerButton.closest("[data-chem-question]");
+        const questionIndex = Number(question.dataset.chemQuestion);
+        chemistryAnswers[questionIndex] = Number(chemistryAnswerButton.dataset.chemOption);
+        question.querySelectorAll(".quiz-option").forEach(button => button.classList.toggle("selected", button === chemistryAnswerButton));
+        question.querySelector(".quiz-feedback").classList.add("hidden");
+        document.getElementById("chemistry-lesson-result").classList.add("hidden");
+      }
+      if (checkChemistryButton) checkChemistryLesson();
+      if (resetChemistryButton) resetChemistryLesson();
+
+      if (faqButton) {
+        const item = faqButton.closest(".faq-item");
+        const answer = item.querySelector(".faq-answer");
+        const isOpen = faqButton.getAttribute("aria-expanded") === "true";
+        faqButton.setAttribute("aria-expanded", String(!isOpen));
+        answer.classList.toggle("hidden", isOpen);
+        item.classList.toggle("open", !isOpen);
+      }
+
+      if (tabButton) showTab(tabButton.dataset.tab);
+      if (goButton) showTab(goButton.dataset.go);
+      if (examButton) {
+        currentExam = examButton.dataset.exam;
+        document.querySelectorAll(".exam-btn").forEach(b => b.classList.toggle("active", b === examButton));
+        $("#exam-label").textContent = currentExam;
+        $("#subjects-subtitle").textContent = `Выбери дисциплину для подготовки к ${currentExam}.`;
+      }
+      if (subjectButton) {
+        currentSubject = subjectButton.dataset.subject;
+        $("#selected-subject").textContent = currentSubject;
+        $("#subject-intro").textContent = `Подготовка к ${currentExam}: теория, практика и разбор ошибок.`;
+        renderSubjects();
+        const courseButton = document.getElementById("selected-course-button");
+        if (currentExam === "ОГЭ" && currentSubject === "Русский язык") {
+          courseButton.dataset.go = "russian-course";
+          courseButton.textContent = "Открыть курс «Русский язык · ОГЭ» →";
+          showTab("russian-course");
+        } else if (currentExam === "ОГЭ" && currentSubject === "Математика") {
+          courseButton.dataset.go = "course";
+          courseButton.textContent = "Открыть курс «Математика · ОГЭ» →";
+          showTab("course");
+        } else if (currentExam === "ОГЭ" && currentSubject === "Английский") {
+          courseButton.dataset.go = "english-course";
+          courseButton.textContent = "Открыть курс «Английский · ОГЭ» →";
+          showTab("english-course");
+        } else if (currentExam === "ОГЭ" && currentSubject === "Биология") {
+          courseButton.dataset.go = "biology-course";
+          courseButton.textContent = "Открыть курс «Биология · ОГЭ» →";
+          showTab("biology-course");
+        } else if (currentExam === "ОГЭ" && currentSubject === "Физика") {
+          courseButton.dataset.go = "physics-course";
+          courseButton.textContent = "Открыть курс «Физика · ОГЭ» →";
+          showTab("physics-course");
+        } else if (currentExam === "ОГЭ" && currentSubject === "Химия") {
+          courseButton.dataset.go = "chemistry-course";
+          courseButton.textContent = "Открыть курс «Химия · ОГЭ» →";
+          showTab("chemistry-course");
+        } else {
+          courseButton.dataset.go = "subjects";
+          courseButton.textContent = "Курсы этого предмета скоро появятся";
+          showTab("home");
+        }
+      }
+      if (periodButton) {
+        currentPeriod = periodButton.dataset.period;
+        document.querySelectorAll("[data-period]").forEach(b => b.classList.toggle("active", b === periodButton));
+        renderPlans();
+      }
+      if (planButton) {
+        chosenPlan = planButton.dataset.plan;
+        $("#plan-selection").textContent = `Выбранный тариф: ${chosenPlan}. Это демонстрация — оплата отключена.`;
+      }
+    });
+
+    renderSubjects();
+    renderPlans();
+    updateCourseProgress();
+    updateRussianProgress();
+    if (tg && tg.BackButton) tg.BackButton.hide();
+  </script>
+</body>
+</html>
