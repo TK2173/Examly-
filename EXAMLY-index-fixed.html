@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#090e1b">
+  <title>EXAMLY — подготовка к ОГЭ и ЕГЭ</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #090e1b;
+      --panel: #111c32;
+      --panel-2: #15213a;
+      --line: #263550;
+      --text: #f4f7ff;
+      --muted: #98a9c8;
+      --blue: #83aaff;
+      --radius: 20px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse at 85% 0%, rgba(67,105,184,.18), transparent 34rem),
+        radial-gradient(ellipse at 0% 40%, rgba(83,65,145,.12), transparent 30rem),
+        var(--bg);
+      color: var(--text);
+      font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    button { font: inherit; cursor: pointer; }
+    .app { width: min(100%, 1050px); margin: 0 auto; padding: 22px 18px 44px; }
+    /* Дополнительный верхний отступ внутри Telegram Mini App, чтобы заголовки вкладок не попадали под системную панель. */
+    body.telegram-mini-app .app { padding-top: calc(22px + var(--tg-content-safe-top, 24px)); }
+    .topbar { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:22px; }
+    .brand { display:flex; align-items:center; gap:11px; }
+    .logo {
+      width:44px; height:44px; display:grid; place-items:center; border-radius:14px;
+      background:linear-gradient(145deg,#294779,#172544); color:#a9c5ff;
+      font-size:24px; font-weight:850; box-shadow:inset 0 1px 0 #ffffff25;
+    }
+    .brand-name { font-weight:850; letter-spacing:.12em; font-size:17px; }
+    .brand-sub { color:#8296ba; font-size:9px; letter-spacing:.13em; }
+    .beta { color:#91e0b4; border:1px solid #397456; background:#153528; padding:5px 10px; border-radius:99px; font-size:11px; font-weight:800; letter-spacing:.08em; }
+    .hero {
+      background:linear-gradient(120deg,#17294a,#111c32 62%,#1c2340);
+      border:1px solid #2b3e61; border-radius:26px; padding:26px; position:relative; overflow:hidden;
+      box-shadow:0 18px 55px #0003;
+    }
+    .hero:after { content:""; position:absolute; width:220px;height:220px;right:-70px;top:-90px;border-radius:50%;background:#789fff18;filter:blur(2px); }
+    .eyebrow { color:#9db7e7; font-size:11px; font-weight:800; letter-spacing:.15em; }
+    h1 { margin:9px 0 8px; font-size:clamp(27px,5vw,43px); line-height:1.08; letter-spacing:-.04em; }
+    .hero p { color:#b4c3df; max-width:590px; margin:0; }
+    .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:22px; max-width:560px; }
+    .stat { background:#ffffff0b; border:1px solid #ffffff12; border-radius:14px; padding:11px 13px; }
+    .stat small { display:block; color:#9eafd0; font-size:10px; letter-spacing:.08em; }
+    .stat strong { display:block; margin-top:3px; font-size:19px; }
+    .exam-switch { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin:18px 0; }
+    .exam-btn,.nav-btn,.outline-btn,.primary-btn {
+      border:1px solid var(--line); border-radius:13px; padding:11px 14px; color:#c6d3e9; background:#111c32;
+      transition:transform .15s,border-color .15s,background .15s;
+    }
+    button:hover { transform:translateY(-1px); }
+    .exam-btn.active,.nav-btn.active { background:#294779; border-color:#7198e4; color:white; }
+    .nav { display:flex; gap:8px; margin-bottom:20px; overflow-x:auto; padding-bottom:3px; }
+    .nav-btn { flex:1; min-width:100px; background:#101a2d; }
+    .section-head { display:flex; align-items:end; justify-content:space-between; gap:12px; margin:22px 0 13px; }
+    h2 { font-size:21px; letter-spacing:-.025em; margin:0; }
+    .muted { color:var(--muted); font-size:13px; margin:5px 0 0; }
+    .subject-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:11px; }
+    .subject {
+      text-align:left; min-height:128px; padding:15px; border-radius:17px; border:1px solid var(--line);
+      background:linear-gradient(145deg,#17243b,#111a2b); color:var(--text); display:flex; flex-direction:column; gap:9px;
+    }
+    .subject.selected { outline:2px solid var(--subject-color); border-color:var(--subject-color); }
+    .subject-top { display:flex; justify-content:space-between; align-items:center; }
+    .subject-icon { width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:color-mix(in srgb,var(--subject-color) 16%,transparent);color:var(--subject-color); flex:0 0 38px; }
+    .subject-icon svg { width:21px;height:21px;display:block;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round; }
+    .subject-name { font-weight:750; }
+    .subject-desc { color:#91a2c0; font-size:11px; }
+    .feature-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px; }
+    .feature { background:#121e33;border:1px solid #24344f;border-radius:16px;padding:15px; }
+    .feature-icon { font-size:20px; margin-bottom:5px; }
+    .feature strong { display:block; }
+    .feature small { color:var(--muted); }
+    .callout { background:#121e33;border:1px solid #293b5c;border-radius:18px;padding:18px;margin-top:17px; }
+    .primary-btn { background:#6f98e8; border-color:#8bb0ff; color:#071326; font-weight:800; }
+    .primary-btn:hover { background:#8aaff8; }
+    .outline-btn { background:transparent; }
+    .full { width:100%; margin-top:12px; }
+    .pricing-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:12px; }
+    .plan { background:#121e33;border:1px solid #293953;border-radius:20px;padding:19px;display:flex;flex-direction:column; }
+    .plan.popular { border:2px solid #7299e6;background:linear-gradient(150deg,#1a2b4b,#142039); }
+    .plan h3 { margin:0;font-size:19px; }
+    .price { font-size:29px;font-weight:850;letter-spacing:-.04em;margin:10px 0 0; }
+    .period { color:var(--muted);font-size:12px; }
+    .plan p { color:#aab9d2;font-size:13px;min-height:38px; }
+    .plan ul { list-style:none;padding:0;margin:8px 0 15px;display:grid;gap:8px;color:#d8e2f2;font-size:13px; }
+    .plan li:before { content:"✓";color:#8fd7ae;font-weight:900;margin-right:8px; }
+    .plan .primary-btn,.plan .outline-btn { margin-top:auto; }
+    .period-switch { display:flex;gap:5px;padding:4px;background:#101a2d;border:1px solid #253550;border-radius:13px;width:max-content; }
+    .period-switch button { border:0;background:transparent;color:#a9b9d2;padding:8px 12px;border-radius:9px; }
+    .period-switch button.active { background:#294779;color:white; }
+    .notice { margin-top:15px;padding:13px 15px;border-radius:14px;background:#2b2618;border:1px solid #69552b;color:#e8d4a2;font-size:12px; }
+    .selection { margin-top:13px;color:#b6c6df;font-size:13px; }
+    .hidden { display:none !important; }
+    footer { margin-top:27px;border-top:1px solid #202e46;padding-top:16px;color:#7185a8;font-size:11px;display:flex;justify-content:space-between;gap:12px; }
+    @media (max-width:700px) {
+      .app { padding:16px 13px 32px; }
+      .hero { padding:21px; }
+      .subject-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .pricing-grid { grid-template-columns:1fr; }
+      .stats { gap:7px; }
+      .stat { padding:9px; }
+      .stat strong { font-size:16px; }
+    }
+    @media (max-width:380px) {
+      .subject-grid { grid-template-columns:1fr; }
+      .brand-sub { font-size:8px; }
+      .hero { padding:18px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">E</div>
+        <div><div class="brand-name">EXAMLY</div><div class="brand-sub">ТВОЙ ПУТЬ К ВЫСОКОМУ БАЛЛУ</div></div>
+      </div>
+      <span class="beta">BETA</span>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow">ПОДГОТОВКА К ЭКЗАМЕНАМ</div>
+      <h1>Сдай на максимум.</h1>
+      <p>Готовься к ОГЭ и ЕГЭ в своём темпе. Изучай теорию, решай задания и отслеживай свой прогресс.</p>
+      <div class="stats">
+        <div class="stat"><small>ПРЕДМЕТОВ</small><strong>11+</strong></div>
+        <div class="stat"><small>ЭКЗАМЕНЫ</small><strong>ОГЭ / ЕГЭ</strong></div>
+        <div class="stat"><small>РЕЖИМ</small><strong>24/7</strong></div>
+      </div>
+    </section>
+
+    <div class="exam-switch" role="group" aria-label="Выбор экзамена">
+      <button class="exam-btn active" data-exam="ОГЭ">ОГЭ · 9 класс</button>
+      <button class="exam-btn" data-exam="ЕГЭ">ЕГЭ · 11 класс</button>
+    </div>
+
+    <nav class="nav" aria-label="Основная навигация">
+      <button class="nav-btn active" data-tab="home">Главная</button>
+      <button class="nav-btn" data-tab="subjects">Предметы</button>
+      <button class="nav-btn" data-tab="tariffs">Тарифы</button>
+    </nav>
+
+    <section id="home" class="page">
+      <div class="section-head"><div><h2>Продолжить подготовку</h2><p class="muted">Твой учебный маршрут</p></div><span class="beta" id="exam-label">ОГЭ</span></div>
+      <div class="callout">
+        <div class="eyebrow">ВЫБРАННЫЙ ПРЕДМЕТ</div>
+        <h2 id="selected-subject" style="margin-top:6px">Математика</h2>
+        <p class="muted" id="subject-intro">Теория, практика и разбор ошибок — в одном месте.</p>
+        <button class="primary-btn full" data-go="subjects">Выбрать предмет и тему →</button>
+      </div>
+      <div class="section-head"><div><h2>Всё для подготовки</h2><p class="muted">Учись системно, а не наугад</p></div></div>
+      <div class="feature-grid">
+        <div class="feature"><div class="feature-icon">📘</div><strong>Теория</strong><small>Короткие понятные уроки</small></div>
+        <div class="feature"><div class="feature-icon">✍️</div><strong>Тесты</strong><small>Задания в формате экзамена</small></div>
+        <div class="feature"><div class="feature-icon">📊</div><strong>Прогресс</strong><small>Отслеживание результатов</small></div>
+        <div class="feature"><div class="feature-icon">🧠</div><strong>Работа над ошибками</strong><small>Разбор сложных вопросов</small></div>
+      </div>
+      <div class="callout">
+        <h2>Начни с диагностики</h2>
+        <p class="muted">Выбери предмет и пройди входной тест. В полноценной версии он поможет определить темы, которым стоит уделить больше внимания.</p>
+        <button class="outline-btn full" data-go="subjects">Посмотреть предметы</button>
+      </div>
+    </section>
+
+    <section id="subjects" class="page hidden">
+      <div class="section-head"><div><h2>Все предметы</h2><p class="muted" id="subjects-subtitle">Выбери дисциплину для подготовки к ОГЭ.</p></div></div>
+      <div class="subject-grid" id="subject-grid"></div>
+      <p class="muted" style="margin-top:13px">Набор предметов и учебных тем можно расширять по мере развития платформы.</p>
+    </section>
+
+    <section id="tariffs" class="page hidden">
+      <div class="section-head"><div><h2>Тарифы EXAMLY</h2><p class="muted">Доступная подготовка без переплаты.</p></div></div>
+      <div class="period-switch" role="group" aria-label="Период оплаты">
+        <button class="active" data-period="month">Месяц</button>
+        <button data-period="year">Год · выгоднее</button>
+      </div>
+      <div class="pricing-grid" id="pricing-grid" style="margin-top:13px"></div>
+      <div class="notice">Демо-режим: оплата не подключена. Кнопки тарифов только показывают выбор и не списывают деньги. Не вводи здесь данные банковской карты.</div>
+      <div class="selection" id="plan-selection" aria-live="polite">Выбранный тариф: пока не выбран.</div>
+    </section>
+
+    <footer><span>EXAMLY · BETA PREVIEW</span><span>Учись. Тренируйся. Сдавай.</span></footer>
+  </main>
+
+  <script>
+    "use strict";
+
+    // Демо-интерфейс: без сетевых запросов, аналитики, cookies и платёжных операций.
+    const subjects = [
+      { name:"Математика", desc:"Алгебра · геометрия · задачи", icon:`<path d="M5 5h14v14H5z"/><path d="M8 9h8M8 15h3m2-2 3 3m0-3-3 3"/>`, color:"#7898ff" },
+      { name:"Русский язык", desc:"Правила · сочинение · тесты", icon:`<path d="M6 4h12v16H6z"/><path d="M9 8h6M9 12h6M9 16h4"/>`, color:"#ff718b" },
+      { name:"Английский", desc:"Grammar · Reading · Listening", icon:`<path d="M4 6h16M12 4v2m-5 0c0 6 3 9 8 11m-7-6c1 2 3 4 6 5M5 20l5-7"/>`, color:"#ae91ff" },
+      { name:"Информатика", desc:"Алгоритмы · код · теория", icon:`<rect x="4" y="5" width="16" height="11" rx="2"/><path d="M8 20h8m-4-4v4M8 9l2 2-2 2m5 0h3"/>`, color:"#39cbb8" },
+      { name:"Физика", desc:"Формулы · задачи · эксперименты", icon:`<circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="9" ry="4.5"/><ellipse cx="12" cy="12" rx="9" ry="4.5" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="4.5" transform="rotate(120 12 12)"/>`, color:"#f4a64b" },
+      { name:"Химия", desc:"Реакции · формулы · вещества", icon:`<path d="M9 4h6m-5 0v6l-5 8a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-8V4"/><path d="M7 16h10m-7-3h4"/>`, color:"#55c7f2" },
+      { name:"Биология", desc:"Анатомия · генетика · ботаника", icon:`<path d="M19 5C10 4 5 8 5 14a5 5 0 0 0 5 5c6 0 10-5 9-14Z"/><path d="M4 20c3-5 7-8 12-11m-7 8 1-4m4 0 3 1"/>`, color:"#77c98b" },
+      { name:"История", desc:"Даты · события · личности", icon:`<path d="M4 7h16M6 7v12m4-12v12m4-12v12m4-12v12M4 19h16M3 5l9-3 9 3"/>`, color:"#d9a56f" },
+      { name:"Обществознание", desc:"Право · экономика · общество", icon:`<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0m1-4a4 4 0 0 1 5 4"/>`, color:"#e18ac6" },
+      { name:"География", desc:"Карты · страны · климат", icon:`<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>`, color:"#49b9a5" },
+      { name:"Литература", desc:"Произведения · авторы · анализ", icon:`<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11M9 8h6m-6 4h5"/>`, color:"#c49bff" }
+    ];
+
+    const plans = [
+      { name:"Бесплатный", month:0, year:0, badge:"Попробуй", desc:"Чтобы познакомиться с платформой.", features:["Базовые уроки","Ограниченное количество тестов","Базовый прогресс"] },
+      { name:"Старт", month:99, year:950, badge:"Для начала", desc:"Больше практики и системная подготовка.", features:["Всё из бесплатного","Тесты по выбранному предмету","Подробные объяснения ответов"] },
+      { name:"Плюс", month:199, year:1910, badge:"Популярный", desc:"Для тех, кто хочет готовиться серьёзно.", features:["Всё из тарифа Старт","Все предметы и темы","Персональный план подготовки","Статистика ошибок и прогресса","Повторение сложных заданий"], popular:true },
+      { name:"Максимум", month:349, year:3350, badge:"Полный доступ", desc:"Расширенные инструменты подготовки.", features:["Всё из тарифа Плюс","Расширенная аналитика","Больше тренировочных режимов","Приоритетный доступ к новым функциям"] }
+    ];
+
+    let currentExam = "ОГЭ";
+    let currentSubject = "Математика";
+    let currentTab = "home";
+
+    // Telegram Mini App: безопасная инициализация без изменения дизайна сайта.
+    const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (tg) {
+      document.body.classList.add("telegram-mini-app");
+      const updateTelegramSafeArea = () => {
+        const inset = tg.contentSafeAreaInset && Number.isFinite(tg.contentSafeAreaInset.top)
+          ? tg.contentSafeAreaInset.top
+          : 24;
+        document.documentElement.style.setProperty("--tg-content-safe-top", `${Math.max(24, inset)}px`);
+      };
+      updateTelegramSafeArea();
+      if (tg.onEvent) {
+        tg.onEvent("safeAreaChanged", updateTelegramSafeArea);
+        tg.onEvent("contentSafeAreaChanged", updateTelegramSafeArea);
+      }
+      tg.ready();
+      tg.expand();
+      try {
+        tg.setHeaderColor("#090e1b");
+        tg.setBackgroundColor("#090e1b");
+      } catch (_) {}
+      if (tg.BackButton) {
+        tg.BackButton.onClick(() => {
+          if (currentTab !== "home") showTab("home");
+          else if (tg.close) tg.close();
+        });
+      }
+    }
+    let currentPeriod = "month";
+    let chosenPlan = "";
+
+    const $ = (selector) => document.querySelector(selector);
+
+    function renderSubjects() {
+      $("#subject-grid").innerHTML = subjects.map((s) => `
+        <button class="subject ${s.name === currentSubject ? "selected" : ""}"
+          style="--subject-color:${s.color}" data-subject="${s.name}"
+          aria-pressed="${s.name === currentSubject}">
+          <span class="subject-top"><span class="subject-icon"><svg viewBox="0 0 24 24" aria-hidden="true">${s.icon}</svg></span><span aria-hidden="true">↗</span></span>
+          <span class="subject-name">${s.name}</span>
+          <span class="subject-desc">${s.desc}</span>
+        </button>`).join("");
+    }
+
+    function renderPlans() {
+      $("#pricing-grid").innerHTML = plans.map((p) => {
+        const price = p[currentPeriod];
+        const priceText = price === 0 ? "0 ₽" : `${price.toLocaleString("ru-RU")} ₽`;
+        const periodText = price === 0 ? "навсегда" : (currentPeriod === "month" ? "в месяц" : "в год");
+        return `<article class="plan ${p.popular ? "popular" : ""}">
+          <div class="eyebrow">${p.badge}</div>
+          <h3>${p.name}</h3>
+          <div class="price">${priceText}</div><div class="period">${periodText}</div>
+          <p>${p.desc}</p>
+          <ul>${p.features.map(f => `<li>${f}</li>`).join("")}</ul>
+          <button class="${p.popular ? "primary-btn" : "outline-btn"} full" data-plan="${p.name}">
+            ${p.name === "Бесплатный" ? "Выбрать бесплатно" : "Выбрать тариф"}
+          </button>
+        </article>`;
+      }).join("");
+    }
+
+    function showTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll(".page").forEach(el => el.classList.toggle("hidden", el.id !== tab));
+      document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.tab === tab));
+      if (tab === "subjects") renderSubjects();
+      if (tab === "tariffs") renderPlans();
+      if (tg && tg.BackButton) {
+        if (tab === "home") tg.BackButton.hide();
+        else tg.BackButton.show();
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    document.addEventListener("click", (event) => {
+      const tabButton = event.target.closest("[data-tab]");
+      const goButton = event.target.closest("[data-go]");
+      const examButton = event.target.closest("[data-exam]");
+      const subjectButton = event.target.closest("[data-subject]");
+      const periodButton = event.target.closest("[data-period]");
+      const planButton = event.target.closest("[data-plan]");
+
+      if (tabButton) showTab(tabButton.dataset.tab);
+      if (goButton) showTab(goButton.dataset.go);
+      if (examButton) {
+        currentExam = examButton.dataset.exam;
+        document.querySelectorAll(".exam-btn").forEach(b => b.classList.toggle("active", b === examButton));
+        $("#exam-label").textContent = currentExam;
+        $("#subjects-subtitle").textContent = `Выбери дисциплину для подготовки к ${currentExam}.`;
+      }
+      if (subjectButton) {
+        currentSubject = subjectButton.dataset.subject;
+        $("#selected-subject").textContent = currentSubject;
+        $("#subject-intro").textContent = `Подготовка к ${currentExam}: теория, практика и разбор ошибок.`;
+        renderSubjects();
+        showTab("home");
+      }
+      if (periodButton) {
+        currentPeriod = periodButton.dataset.period;
+        document.querySelectorAll("[data-period]").forEach(b => b.classList.toggle("active", b === periodButton));
+        renderPlans();
+      }
+      if (planButton) {
+        chosenPlan = planButton.dataset.plan;
+        $("#plan-selection").textContent = `Выбранный тариф: ${chosenPlan}. Это демонстрация — оплата отключена.`;
+      }
+    });
+
+    renderSubjects();
+    renderPlans();
+    if (tg && tg.BackButton) tg.BackButton.hide();
+  </script>
+</body>
+</html>
